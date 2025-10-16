@@ -13,17 +13,51 @@ import java.util.stream.Collectors;
  */
 public class NewsAnalyzer {
     
-    // Simple sentiment words for basic analysis
+    // Enhanced sentiment words for better analysis
     private static final Set<String> POSITIVE_WORDS = new HashSet<>(Arrays.asList(
-        "good", "great", "excellent", "amazing", "wonderful", "fantastic", "positive",
-        "success", "win", "victory", "achievement", "breakthrough", "progress", "growth",
-        "love", "happy", "joy", "celebrate", "triumph", "benefit", "gain", "improve"
+        // Basic positive words
+        "good", "great", "excellent", "amazing", "wonderful", "fantastic", "positive", "best", "better",
+        "outstanding", "superb", "brilliant", "awesome", "incredible", "magnificent", "marvelous",
+        // Success and achievement
+        "success", "successful", "win", "winning", "victory", "victorious", "achievement", "accomplish",
+        "breakthrough", "progress", "growth", "improve", "improvement", "advance", "rise", "boost",
+        "surge", "gain", "profit", "benefit", "advantage", "opportunity", "record", "high",
+        // Emotions and feelings
+        "love", "happy", "happiness", "joy", "joyful", "celebrate", "celebration", "triumph",
+        "pleased", "delighted", "excited", "thrilled", "optimistic", "hope", "hopeful", "confident",
+        "proud", "satisfaction", "smile", "laugh", "peace", "peaceful", "calm",
+        // Quality and approval
+        "quality", "premium", "top", "leading", "first", "winner", "champion", "hero", "star",
+        "approve", "support", "agree", "accept", "welcome", "embrace", "praise", "appreciate",
+        "thank", "gratitude", "honor", "respect", "admire", "inspire", "motivate",
+        // Health and life
+        "health", "healthy", "cure", "heal", "recover", "recovery", "save", "rescue", "help",
+        "relief", "comfort", "safe", "safety", "secure", "protect", "strengthen", "strong"
     ));
     
     private static final Set<String> NEGATIVE_WORDS = new HashSet<>(Arrays.asList(
-        "bad", "terrible", "awful", "horrible", "negative", "fail", "failure", "loss",
-        "defeat", "crisis", "problem", "issue", "concern", "worry", "fear", "decline",
-        "disaster", "tragedy", "death", "kill", "war", "conflict", "attack", "threat"
+        // Basic negative words
+        "bad", "terrible", "awful", "horrible", "worst", "worse", "negative", "poor", "fail",
+        "failure", "failed", "failing", "loss", "lose", "losing", "lost", "defeat", "beaten",
+        // Crisis and problems
+        "crisis", "problem", "problems", "issue", "issues", "trouble", "difficulty", "challenge",
+        "concern", "worry", "worried", "fear", "afraid", "scared", "panic", "anxiety", "stress",
+        "decline", "decrease", "drop", "fall", "crash", "collapse", "breakdown", "recession",
+        // Violence and conflict
+        "disaster", "catastrophe", "tragedy", "tragic", "death", "die", "died", "kill", "killed",
+        "murder", "shooting", "violence", "violent", "attack", "assault", "bomb", "explosion",
+        "war", "warfare", "conflict", "fight", "battle", "terrorism", "terrorist", "threat",
+        "threaten", "danger", "dangerous", "risk", "risky", "harm", "damage", "destroy",
+        // Emotions and feelings
+        "hate", "angry", "anger", "rage", "furious", "mad", "upset", "disappointed", "sad",
+        "sadness", "depression", "depressed", "miserable", "unhappy", "cry", "tears", "grief",
+        "hurt", "pain", "suffer", "suffering", "agony", "torture", "abuse", "victim",
+        // Corruption and wrongdoing
+        "corrupt", "corruption", "scandal", "fraud", "lie", "lying", "cheat", "steal", "theft",
+        "crime", "criminal", "illegal", "arrest", "prison", "jail", "guilty", "blame", "fault",
+        // Rejection and disapproval
+        "reject", "denial", "refuse", "oppose", "against", "protest", "criticize", "condemn",
+        "dispute", "disagree", "controversy", "controversial", "boycott", "ban", "forbid"
     ));
     
     /**
@@ -210,20 +244,5 @@ public class NewsAnalyzer {
                 ));
     }
     
-    /**
-     * Get publication timeline (hourly distribution)
-     */
-    public static Map<String, Integer> getPublicationTimeline(List<NewsArticle> articles) {
-        Map<String, Integer> timeline = new LinkedHashMap<>();
-        
-        articles.stream()
-                .filter(article -> article.getPublishedAt() != null)
-                .forEach(article -> {
-                    String hour = article.getPublishedAt().toLocalDate().toString() + " " + 
-                                 String.format("%02d:00", article.getPublishedAt().getHour());
-                    timeline.put(hour, timeline.getOrDefault(hour, 0) + 1);
-                });
-        
-        return timeline;
-    }
+    // Publication timeline functionality removed
 }

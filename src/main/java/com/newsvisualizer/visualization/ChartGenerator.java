@@ -13,15 +13,8 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
-import org.jfree.data.time.Day;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.xy.XYDataset;
-
 import javax.swing.*;
 import java.awt.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 /**
@@ -113,39 +106,7 @@ public class ChartGenerator {
         return new ChartPanel(chart);
     }
     
-    /**
-     * Create a time series chart for temporal data
-     */
-    public static JPanel createTimeSeriesChart(String title, String timeAxisLabel, 
-                                              String valueAxisLabel, Map<String, Integer> data) {
-        TimeSeries series = new TimeSeries("Articles");
-        
-        for (Map.Entry<String, Integer> entry : data.entrySet()) {
-            try {
-                LocalDate date = LocalDate.parse(entry.getKey(), DateTimeFormatter.ISO_LOCAL_DATE);
-                Day day = new Day(date.getDayOfMonth(), date.getMonthValue(), date.getYear());
-                series.add(day, entry.getValue());
-            } catch (Exception e) {
-                // Skip invalid dates
-            }
-        }
-        
-        TimeSeriesCollection dataset = new TimeSeriesCollection();
-        dataset.addSeries(series);
-        
-        JFreeChart chart = ChartFactory.createTimeSeriesChart(
-                title,
-                timeAxisLabel,
-                valueAxisLabel,
-                dataset,
-                false, // legend
-                true, // tooltips
-                false // URLs
-        );
-        
-        customizeChart(chart);
-        return new ChartPanel(chart);
-    }
+    // Timeline chart functionality removed
     
     /**
      * Create a sentiment analysis chart (special pie chart with sentiment colors)
@@ -233,7 +194,7 @@ public class ChartGenerator {
         plot.setLabelOutlinePaint(Color.LIGHT_GRAY);
         plot.setLabelShadowPaint(null);
         plot.setSectionOutlinesVisible(true);
-        plot.setSectionOutlinePaint(Color.WHITE);
+        plot.setDefaultSectionOutlinePaint(Color.WHITE);
     }
     
     /**

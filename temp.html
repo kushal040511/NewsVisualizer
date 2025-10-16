@@ -1,0 +1,1072 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.1">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'Helvetica Light'}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'Helvetica Light'; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1"># NewsVisualizer Database JDBC Integration Guide</p>
+<p class="p2"><br></p>
+<p class="p1">## Complete Step-by-Step Database Connectivity Explanation</p>
+<p class="p2"><br></p>
+<p class="p1">---</p>
+<p class="p2"><br></p>
+<p class="p1">## Table of Contents</p>
+<p class="p1">1. [Architecture Overview](#architecture-overview)</p>
+<p class="p1">2. [JDBC Setup and Configuration](#jdbc-setup-and-configuration)</p>
+<p class="p1">3. [Database Initialization Process](#database-initialization-process)</p>
+<p class="p1">4. [Backend Database Integration](#backend-database-integration)</p>
+<p class="p1">5. [Frontend Database Integration](#frontend-database-integration)</p>
+<p class="p1">6. [Complete Code Examples](#complete-code-examples)</p>
+<p class="p1">7. [Data Flow Diagrams](#data-flow-diagrams)</p>
+<p class="p1">8. [Security Implementation](#security-implementation)</p>
+<p class="p2"><br></p>
+<p class="p1">---</p>
+<p class="p2"><br></p>
+<p class="p1">## 1. Architecture Overview</p>
+<p class="p2"><br></p>
+<p class="p1">### 1.1 Technology Stack</p>
+<p class="p1">- **Database**: H2 Database (Embedded file-based database)</p>
+<p class="p1">- **Connection Pool**: HikariCP (High-performance JDBC connection pool)</p>
+<p class="p1">- **JDBC Driver**: H2 JDBC Driver</p>
+<p class="p1">- **Frontend**: Java Swing GUI</p>
+<p class="p1">- **Backend**: Service Layer Pattern</p>
+<p class="p1">- **Security**: BCrypt password hashing</p>
+<p class="p2"><br></p>
+<p class="p1">### 1.2 Architecture Layers</p>
+<p class="p1">```</p>
+<p class="p1">Frontend (GUI Layer)</p>
+<p class="p1"><span class="Apple-converted-space">    </span>↓ ↑</p>
+<p class="p1">Backend Services (Business Logic)</p>
+<p class="p1"><span class="Apple-converted-space">    </span>↓ ↑</p>
+<p class="p1">Database Service (Data Access Layer)</p>
+<p class="p1"><span class="Apple-converted-space">    </span>↓ ↑</p>
+<p class="p1">JDBC Connection Pool (HikariCP)</p>
+<p class="p1"><span class="Apple-converted-space">    </span>↓ ↑</p>
+<p class="p1">H2 Database (Data Storage)</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">---</p>
+<p class="p2"><br></p>
+<p class="p1">## 2. JDBC Setup and Configuration</p>
+<p class="p2"><br></p>
+<p class="p1">### 2.1 Maven Dependencies (pom.xml)</p>
+<p class="p1">```xml</p>
+<p class="p1">&lt;!-- H2 Database for user data --&gt;</p>
+<p class="p1">&lt;dependency&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;groupId&gt;com.h2database&lt;/groupId&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;artifactId&gt;h2&lt;/artifactId&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;version&gt;2.2.224&lt;/version&gt;</p>
+<p class="p1">&lt;/dependency&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;!-- HikariCP for database connection pooling --&gt;</p>
+<p class="p1">&lt;dependency&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;groupId&gt;com.zaxxer&lt;/groupId&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;artifactId&gt;HikariCP&lt;/artifactId&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;version&gt;5.0.1&lt;/version&gt;</p>
+<p class="p1">&lt;/dependency&gt;</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">### 2.2 Database Configuration Parameters</p>
+<p class="p1">```java</p>
+<p class="p1">// JDBC URL Breakdown</p>
+<p class="p1">jdbc:h2:./data/newsvisualizer;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</p>
+<p class="p2"><br></p>
+<p class="p1">Components:</p>
+<p class="p1">- jdbc:h2: = H2 database protocol</p>
+<p class="p1">- ./data/newsvisualizer = Database file location (relative path)</p>
+<p class="p1">- DB_CLOSE_DELAY=-1 = Keep database open until application closes</p>
+<p class="p1">- DB_CLOSE_ON_EXIT=FALSE = Prevent automatic database shutdown</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">---</p>
+<p class="p2"><br></p>
+<p class="p1">## 3. Database Initialization Process</p>
+<p class="p2"><br></p>
+<p class="p1">### 3.1 Step 1: Connection Pool Setup</p>
+<p class="p1">```java</p>
+<p class="p1">// DatabaseService.java - Connection Pool Initialization</p>
+<p class="p1">private void initializeDatabase() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Create HikariCP configuration</p>
+<p class="p1"><span class="Apple-converted-space">        </span>HikariConfig config = new HikariConfig();</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Basic connection settings</p>
+<p class="p1"><span class="Apple-converted-space">        </span>config.setJdbcUrl("jdbc:h2:./data/newsvisualizer;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>config.setUsername("sa");<span class="Apple-converted-space">        </span>// Default H2 username</p>
+<p class="p1"><span class="Apple-converted-space">        </span>config.setPassword("");<span class="Apple-converted-space">          </span>// Default H2 password (empty)</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Connection pool settings</p>
+<p class="p1"><span class="Apple-converted-space">        </span>config.setMaximumPoolSize(10); <span class="Apple-converted-space">          </span>// Max 10 concurrent connections</p>
+<p class="p1"><span class="Apple-converted-space">        </span>config.setConnectionTimeout(30000);<span class="Apple-converted-space">      </span>// 30 seconds timeout</p>
+<p class="p1"><span class="Apple-converted-space">        </span>config.setIdleTimeout(600000); <span class="Apple-converted-space">          </span>// 10 minutes idle timeout</p>
+<p class="p1"><span class="Apple-converted-space">        </span>config.setMaxLifetime(1800000);<span class="Apple-converted-space">          </span>// 30 minutes max connection life</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Performance optimizations</p>
+<p class="p1"><span class="Apple-converted-space">        </span>config.addDataSourceProperty("cachePrepStmts", "true");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>config.addDataSourceProperty("prepStmtCacheSize", "250");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Create the data source (connection pool)</p>
+<p class="p1"><span class="Apple-converted-space">        </span>this.dataSource = new HikariDataSource(config);</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>logger.info("Database initialized successfully");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>} catch (Exception e) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>logger.error("Failed to initialize database", e);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>throw new RuntimeException("Database initialization failed", e);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">### 3.2 Step 2: Table Creation</p>
+<p class="p1">```java</p>
+<p class="p1">// DatabaseService.java - Table Creation</p>
+<p class="p1">private void createTables() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>try (Connection conn = dataSource.getConnection()) {</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Create users table SQL</p>
+<p class="p1"><span class="Apple-converted-space">        </span>String createUsersTable = """</p>
+<p class="p1"><span class="Apple-converted-space">            </span>CREATE TABLE IF NOT EXISTS users (</p>
+<p class="p1"><span class="Apple-converted-space">                </span>id BIGINT PRIMARY KEY AUTO_INCREMENT,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>username VARCHAR(50) UNIQUE NOT NULL,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>email VARCHAR(100) UNIQUE NOT NULL,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>password_hash VARCHAR(255) NOT NULL,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>first_name VARCHAR(50),</p>
+<p class="p1"><span class="Apple-converted-space">                </span>last_name VARCHAR(50),</p>
+<p class="p1"><span class="Apple-converted-space">                </span>created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>last_login_at TIMESTAMP,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>is_active BOOLEAN DEFAULT TRUE</p>
+<p class="p1"><span class="Apple-converted-space">            </span>)</p>
+<p class="p1"><span class="Apple-converted-space">        </span>""";</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Create search history table SQL</p>
+<p class="p1"><span class="Apple-converted-space">        </span>String createSearchHistoryTable = """</p>
+<p class="p1"><span class="Apple-converted-space">            </span>CREATE TABLE IF NOT EXISTS search_history (</p>
+<p class="p1"><span class="Apple-converted-space">                </span>id BIGINT PRIMARY KEY AUTO_INCREMENT,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>user_id BIGINT NOT NULL,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>search_type VARCHAR(20) NOT NULL,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>search_query VARCHAR(500),</p>
+<p class="p1"><span class="Apple-converted-space">                </span>country VARCHAR(10),</p>
+<p class="p1"><span class="Apple-converted-space">                </span>category VARCHAR(50),</p>
+<p class="p1"><span class="Apple-converted-space">                </span>articles_found INTEGER DEFAULT 0,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>analysis_results TEXT,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE</p>
+<p class="p1"><span class="Apple-converted-space">            </span>)</p>
+<p class="p1"><span class="Apple-converted-space">        </span>""";</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Execute table creation statements</p>
+<p class="p1"><span class="Apple-converted-space">        </span>try (Statement stmt = conn.createStatement()) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>stmt.execute(createUsersTable);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>stmt.execute(createSearchHistoryTable);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>logger.info("Database tables created successfully");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>} catch (SQLException e) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>logger.error("Failed to create database tables", e);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>throw new RuntimeException("Table creation failed", e);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">---</p>
+<p class="p2"><br></p>
+<p class="p1">## 4. Backend Database Integration</p>
+<p class="p2"><br></p>
+<p class="p1">### 4.1 Singleton DatabaseService Pattern</p>
+<p class="p1">```java</p>
+<p class="p1">// DatabaseService.java - Singleton Implementation</p>
+<p class="p1">public class DatabaseService {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>private static final Logger logger = LoggerFactory.getLogger(DatabaseService.class);</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>private static DatabaseService instance;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>private DataSource dataSource;</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Private constructor to prevent direct instantiation</p>
+<p class="p1"><span class="Apple-converted-space">    </span>private DatabaseService() {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>initializeDatabase();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>createTables();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Thread-safe singleton instance retrieval</p>
+<p class="p1"><span class="Apple-converted-space">    </span>public static synchronized DatabaseService getInstance() {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (instance == null) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>instance = new DatabaseService();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return instance;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">### 4.2 User Management Operations</p>
+<p class="p2"><br></p>
+<p class="p1">#### 4.2.1 Create User (Registration)</p>
+<p class="p1">```java</p>
+<p class="p1">// DatabaseService.java - User Creation</p>
+<p class="p1">public User createUser(User user) throws SQLException {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String sql = "INSERT INTO users (username, email, password_hash, first_name, last_name, created_at) VALUES (?, ?, ?, ?, ?, ?)";</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Use try-with-resources for automatic resource cleanup</p>
+<p class="p1"><span class="Apple-converted-space">    </span>try (Connection conn = dataSource.getConnection();</p>
+<p class="p1"><span class="Apple-converted-space">         </span>PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Bind parameters to prevent SQL injection</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stmt.setString(1, user.getUsername());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stmt.setString(2, user.getEmail());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stmt.setString(3, user.getPasswordHash());<span class="Apple-converted-space">      </span>// BCrypt hashed password</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stmt.setString(4, user.getFirstName());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stmt.setString(5, user.getLastName());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stmt.setTimestamp(6, Timestamp.valueOf(user.getCreatedAt()));</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Execute the insert statement</p>
+<p class="p1"><span class="Apple-converted-space">        </span>int rowsAffected = stmt.executeUpdate();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (rowsAffected &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Retrieve the generated user ID</p>
+<p class="p1"><span class="Apple-converted-space">            </span>try (ResultSet rs = stmt.getGeneratedKeys()) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (rs.next()) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>user.setId(rs.getLong(1));</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>logger.info("User created successfully: {}", user.getUsername());</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return user;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>throw new SQLException("Failed to create user");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">#### 4.2.2 Find User (Authentication)</p>
+<p class="p1">```java</p>
+<p class="p1">// DatabaseService.java - User Lookup</p>
+<p class="p1">public User findUserByUsername(String username) throws SQLException {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String sql = "SELECT * FROM users WHERE username = ? AND is_active = TRUE";</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>try (Connection conn = dataSource.getConnection();</p>
+<p class="p1"><span class="Apple-converted-space">         </span>PreparedStatement stmt = conn.prepareStatement(sql)) {</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>stmt.setString(1, username);</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>try (ResultSet rs = stmt.executeQuery()) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (rs.next()) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return mapResultSetToUser(rs);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>return null; // User not found</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">// Helper method to map database results to User object</p>
+<p class="p1">private User mapResultSetToUser(ResultSet rs) throws SQLException {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>User user = new User();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>user.setId(rs.getLong("id"));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>user.setUsername(rs.getString("username"));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>user.setEmail(rs.getString("email"));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>user.setPasswordHash(rs.getString("password_hash"));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>user.setFirstName(rs.getString("first_name"));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>user.setLastName(rs.getString("last_name"));</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Handle timestamp conversion</p>
+<p class="p1"><span class="Apple-converted-space">    </span>Timestamp createdAt = rs.getTimestamp("created_at");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (createdAt != null) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>user.setCreatedAt(createdAt.toLocalDateTime());</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>Timestamp lastLoginAt = rs.getTimestamp("last_login_at");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (lastLoginAt != null) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>user.setLastLoginAt(lastLoginAt.toLocalDateTime());</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>user.setActive(rs.getBoolean("is_active"));</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>return user;</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">### 4.3 Authentication Service Integration</p>
+<p class="p1">```java</p>
+<p class="p1">// AuthenticationService.java - Backend Business Logic</p>
+<p class="p1">public class AuthenticationService {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>private final DatabaseService databaseService;</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>public AuthenticationService() {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>this.databaseService = DatabaseService.getInstance();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// User login authentication</p>
+<p class="p1"><span class="Apple-converted-space">    </span>public AuthenticationResult login(String username, String password) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Validate input</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (username == null || username.trim().isEmpty()) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return AuthenticationResult.failure("Username is required");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (password == null || password.isEmpty()) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return AuthenticationResult.failure("Password is required");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Find user in database (supports both username and email)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>User user;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (username.contains("@")) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>user = databaseService.findUserByEmail(username.trim());</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>user = databaseService.findUserByUsername(username.trim());</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (user == null) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return AuthenticationResult.failure("Invalid username or password");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Verify password using BCrypt</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!BCrypt.checkpw(password, user.getPasswordHash())) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return AuthenticationResult.failure("Invalid username or password");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Update last login timestamp</p>
+<p class="p1"><span class="Apple-converted-space">            </span>databaseService.updateLastLogin(user.getId());</p>
+<p class="p1"><span class="Apple-converted-space">            </span>user.setLastLoginAt(LocalDateTime.now());</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>logger.info("User logged in successfully: {}", username);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return AuthenticationResult.success(user, "Login successful");</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>} catch (SQLException e) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>logger.error("Database error during login", e);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return AuthenticationResult.failure("Login failed due to database error");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>} catch (Exception e) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>logger.error("Unexpected error during login", e);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return AuthenticationResult.failure("Login failed due to unexpected error");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">---</p>
+<p class="p2"><br></p>
+<p class="p1">## 5. Frontend Database Integration</p>
+<p class="p2"><br></p>
+<p class="p1">### 5.1 Login Window Integration</p>
+<p class="p1">```java</p>
+<p class="p1">// LoginWindow.java - Frontend Authentication</p>
+<p class="p1">private void handleLogin() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String username = loginUsernameField.getText();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String password = new String(loginPasswordField.getPassword());</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Show loading state</p>
+<p class="p1"><span class="Apple-converted-space">    </span>showLoadingState();</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Use SwingWorker for background database operations</p>
+<p class="p1"><span class="Apple-converted-space">    </span>SwingWorker&lt;AuthenticationResult, Void&gt; loginWorker = new SwingWorker&lt;AuthenticationResult, Void&gt;() {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@Override</p>
+<p class="p1"><span class="Apple-converted-space">        </span>protected AuthenticationResult doInBackground() throws Exception {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// This runs on background thread - safe for database operations</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return authService.login(username, password);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>@Override</p>
+<p class="p1"><span class="Apple-converted-space">        </span>protected void done() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// This runs on EDT - safe for GUI updates</p>
+<p class="p1"><span class="Apple-converted-space">                </span>AuthenticationResult result = get();</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>hideLoadingState();</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (result.isSuccess()) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Start user session</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>SessionManager.getInstance().startSession(result.getUser());</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Show success message</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>showMessage("Welcome back, " + result.getUser().getFirstName() + "!", false);</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Navigate to main window</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>openMainWindow();</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Show error message</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>showMessage(result.getMessage(), true);</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Clear password field for security</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>loginPasswordField.setText("");</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>} catch (Exception e) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>logger.error("Error during login", e);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>hideLoadingState();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>showMessage("Login failed: " + e.getMessage(), true);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>loginWorker.execute();</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">### 5.2 Main Window Search History Integration</p>
+<p class="p1">```java</p>
+<p class="p1">// MainWindow.java - Search History Tracking</p>
+<p class="p1">private void fetchNews() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String country = getSelectedCountry();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String category = getSelectedCategory();</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>SwingWorker&lt;NewsResponse, Void&gt; newsWorker = new SwingWorker&lt;NewsResponse, Void&gt;() {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@Override</p>
+<p class="p1"><span class="Apple-converted-space">        </span>protected NewsResponse doInBackground() throws Exception {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Fetch news from external API</p>
+<p class="p1"><span class="Apple-converted-space">            </span>NewsResponse response = newsService.getTopHeadlines(country, category);</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Save search history to database</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (SessionManager.getInstance().isLoggedIn()) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>User currentUser = SessionManager.getInstance().getCurrentUser();</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>SearchHistory history = new SearchHistory();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>history.setUserId(currentUser.getId());</p>
+<p class="p1"><span class="Apple-converted-space">                </span>history.setSearchType("news_search");</p>
+<p class="p1"><span class="Apple-converted-space">                </span>history.setSearchQuery(null); // No specific query for category search</p>
+<p class="p1"><span class="Apple-converted-space">                </span>history.setCountry(country);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>history.setCategory(category);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>history.setArticlesFound(response.getArticles().size());</p>
+<p class="p1"><span class="Apple-converted-space">                </span>history.setSearchedAt(LocalDateTime.now());</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Save to database (background thread safe)</p>
+<p class="p1"><span class="Apple-converted-space">                </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>DatabaseService.getInstance().saveSearchHistory(history);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>logger.info("Search history saved for user: {}", currentUser.getUsername());</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} catch (SQLException e) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>logger.error("Failed to save search history", e);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Don't fail the news fetch for history save failure</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>return response;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>@Override</p>
+<p class="p1"><span class="Apple-converted-space">        </span>protected void done() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>NewsResponse response = get();</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Update GUI with news articles (runs on EDT)</p>
+<p class="p1"><span class="Apple-converted-space">                </span>updateArticlesTable(response.getArticles());</p>
+<p class="p1"><span class="Apple-converted-space">                </span>updateStatusBar("Found " + response.getArticles().size() + " articles");</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>} catch (Exception e) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>logger.error("Error fetching news", e);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>showErrorMessage("Failed to fetch news: " + e.getMessage());</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>newsWorker.execute();</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">### 5.3 User Profile Window Integration</p>
+<p class="p1">```java</p>
+<p class="p1">// UserProfileWindow.java - Display User Information and History</p>
+<p class="p1">private void loadUserProfile() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>User currentUser = SessionManager.getInstance().getCurrentUser();</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Display user information (loaded from session)</p>
+<p class="p1"><span class="Apple-converted-space">    </span>usernameLabel.setText(currentUser.getUsername());</p>
+<p class="p1"><span class="Apple-converted-space">    </span>emailLabel.setText(currentUser.getEmail());</p>
+<p class="p1"><span class="Apple-converted-space">    </span>fullNameLabel.setText(currentUser.getFirstName() + " " + currentUser.getLastName());</p>
+<p class="p1"><span class="Apple-converted-space">    </span>memberSinceLabel.setText(currentUser.getCreatedAt().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (currentUser.getLastLoginAt() != null) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>lastLoginLabel.setText(currentUser.getLastLoginAt().format(DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm")));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Load search history from database</p>
+<p class="p1"><span class="Apple-converted-space">    </span>loadSearchHistory();</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">private void loadSearchHistory() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>User currentUser = SessionManager.getInstance().getCurrentUser();</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>SwingWorker&lt;List&lt;SearchHistory&gt;, Void&gt; historyWorker = new SwingWorker&lt;List&lt;SearchHistory&gt;, Void&gt;() {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@Override</p>
+<p class="p1"><span class="Apple-converted-space">        </span>protected List&lt;SearchHistory&gt; doInBackground() throws Exception {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Fetch user's search history from database (limit to 20 recent)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return DatabaseService.getInstance().getUserSearchHistory(currentUser.getId(), 20);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>@Override</p>
+<p class="p1"><span class="Apple-converted-space">        </span>protected void done() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>List&lt;SearchHistory&gt; history = get();</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Update search history table</p>
+<p class="p1"><span class="Apple-converted-space">                </span>updateSearchHistoryTable(history);</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Update statistics</p>
+<p class="p1"><span class="Apple-converted-space">                </span>int totalSearches = DatabaseService.getInstance().getUserSearchCount(currentUser.getId());</p>
+<p class="p1"><span class="Apple-converted-space">                </span>searchCountLabel.setText(String.valueOf(totalSearches));</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>} catch (Exception e) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>logger.error("Error loading search history", e);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>showErrorMessage("Failed to load search history");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>historyWorker.execute();</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">---</p>
+<p class="p2"><br></p>
+<p class="p1">## 6. Complete Code Examples</p>
+<p class="p2"><br></p>
+<p class="p1">### 6.1 Complete User Registration Flow</p>
+<p class="p1">```java</p>
+<p class="p1">// Complete flow from GUI to Database</p>
+<p class="p2"><br></p>
+<p class="p1">// Step 1: SignupWindow.java - User Input</p>
+<p class="p1">private void handleSignup() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String username = usernameField.getText().trim();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String email = emailField.getText().trim();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String password = new String(passwordField.getPassword());</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String confirmPassword = new String(confirmPasswordField.getPassword());</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String firstName = firstNameField.getText().trim();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String lastName = lastNameField.getText().trim();</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>SwingWorker&lt;AuthenticationResult, Void&gt; signupWorker = new SwingWorker&lt;AuthenticationResult, Void&gt;() {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@Override</p>
+<p class="p1"><span class="Apple-converted-space">        </span>protected AuthenticationResult doInBackground() throws Exception {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return authService.register(username, email, password, confirmPassword, firstName, lastName);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>@Override</p>
+<p class="p1"><span class="Apple-converted-space">        </span>protected void done() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>AuthenticationResult result = get();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (result.isSuccess()) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>JOptionPane.showMessageDialog(SignupWindow.this,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>"Registration successful! Please login.",<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>"Success", JOptionPane.INFORMATION_MESSAGE);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>dispose();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>showError(result.getMessage());</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} catch (Exception e) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>showError("Registration failed: " + e.getMessage());</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>signupWorker.execute();</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">// Step 2: AuthenticationService.java - Business Logic</p>
+<p class="p1">public AuthenticationResult register(String username, String email, String password,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                                   </span>String confirmPassword, String firstName, String lastName) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Validate input</p>
+<p class="p1"><span class="Apple-converted-space">        </span>ValidationResult validation = validateRegistration(username, email, password, confirmPassword);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (!validation.isValid()) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return AuthenticationResult.failure(validation.getErrorMessage());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Check if username already exists</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (databaseService.isUsernameExists(username)) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return AuthenticationResult.failure("Username already exists");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Check if email already exists</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (databaseService.isEmailExists(email)) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return AuthenticationResult.failure("Email already exists");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Hash password using BCrypt</p>
+<p class="p1"><span class="Apple-converted-space">        </span>String passwordHash = BCrypt.hashpw(password, BCrypt.gensalt());</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Create user object</p>
+<p class="p1"><span class="Apple-converted-space">        </span>User user = new User(username, email, passwordHash, firstName, lastName);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>user.setCreatedAt(LocalDateTime.now());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>user.setActive(true);</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Save to database</p>
+<p class="p1"><span class="Apple-converted-space">        </span>user = databaseService.createUser(user);</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>logger.info("User registered successfully: {}", username);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return AuthenticationResult.success(user, "Registration successful");</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>} catch (SQLException e) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>logger.error("Database error during registration", e);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return AuthenticationResult.failure("Registration failed due to database error");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">// Step 3: DatabaseService.java - Data Persistence</p>
+<p class="p1">public User createUser(User user) throws SQLException {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String sql = "INSERT INTO users (username, email, password_hash, first_name, last_name, created_at) VALUES (?, ?, ?, ?, ?, ?)";</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>try (Connection conn = dataSource.getConnection();</p>
+<p class="p1"><span class="Apple-converted-space">         </span>PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>stmt.setString(1, user.getUsername());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stmt.setString(2, user.getEmail());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stmt.setString(3, user.getPasswordHash());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stmt.setString(4, user.getFirstName());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stmt.setString(5, user.getLastName());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stmt.setTimestamp(6, Timestamp.valueOf(user.getCreatedAt()));</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>int rowsAffected = stmt.executeUpdate();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (rowsAffected &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>try (ResultSet rs = stmt.getGeneratedKeys()) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (rs.next()) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>user.setId(rs.getLong(1));</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>logger.info("User created in database with ID: {}", user.getId());</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return user;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>throw new SQLException("Failed to create user");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">### 6.2 Connection Pool Management Example</p>
+<p class="p1">```java</p>
+<p class="p1">// DatabaseService.java - Connection Pool Lifecycle</p>
+<p class="p1">public class DatabaseService {</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Connection pool monitoring</p>
+<p class="p1"><span class="Apple-converted-space">    </span>public void logConnectionPoolStats() {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (dataSource instanceof HikariDataSource) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>HikariDataSource hikariDS = (HikariDataSource) dataSource;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>HikariPoolMXBean poolBean = hikariDS.getHikariPoolMXBean();</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>logger.info("Connection Pool Statistics:");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>logger.info("Active connections: {}", poolBean.getActiveConnections());</p>
+<p class="p1"><span class="Apple-converted-space">            </span>logger.info("Total connections: {}", poolBean.getTotalConnections());</p>
+<p class="p1"><span class="Apple-converted-space">            </span>logger.info("Idle connections: {}", poolBean.getIdleConnections());</p>
+<p class="p1"><span class="Apple-converted-space">            </span>logger.info("Waiting for connection: {}", poolBean.getThreadsAwaitingConnection());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Proper connection usage pattern</p>
+<p class="p1"><span class="Apple-converted-space">    </span>public boolean updateLastLogin(Long userId) throws SQLException {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>String sql = "UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?";</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Connection automatically returned to pool after try block</p>
+<p class="p1"><span class="Apple-converted-space">        </span>try (Connection conn = dataSource.getConnection();</p>
+<p class="p1"><span class="Apple-converted-space">             </span>PreparedStatement stmt = conn.prepareStatement(sql)) {</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>stmt.setLong(1, userId);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>int rowsUpdated = stmt.executeUpdate();</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>logger.debug("Updated last login for user ID: {}", userId);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return rowsUpdated &gt; 0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Connection automatically closed and returned to pool here</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Application shutdown - close connection pool</p>
+<p class="p1"><span class="Apple-converted-space">    </span>public void close() {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (dataSource instanceof HikariDataSource) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>((HikariDataSource) dataSource).close();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>logger.info("Database connection pool closed");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">---</p>
+<p class="p2"><br></p>
+<p class="p1">## 7. Data Flow Diagrams</p>
+<p class="p2"><br></p>
+<p class="p1">### 7.1 User Authentication Data Flow</p>
+<p class="p1">```</p>
+<p class="p1">┌─────────────────┐<span class="Apple-converted-space">    </span>┌──────────────────┐<span class="Apple-converted-space">    </span>┌─────────────────┐</p>
+<p class="p1">│ <span class="Apple-converted-space">  </span>LoginWindow <span class="Apple-converted-space">  </span>│<span class="Apple-converted-space">    </span>│ AuthenticationSvc │<span class="Apple-converted-space">    </span>│ DatabaseService │</p>
+<p class="p1">│ <span class="Apple-converted-space">  </span>(Frontend)<span class="Apple-converted-space">    </span>│<span class="Apple-converted-space">    </span>│ <span class="Apple-converted-space">  </span>(Backend)<span class="Apple-converted-space">      </span>│<span class="Apple-converted-space">    </span>│ (Data Layer)<span class="Apple-converted-space">    </span>│</p>
+<p class="p1">└─────────────────┘<span class="Apple-converted-space">    </span>└──────────────────┘<span class="Apple-converted-space">    </span>└─────────────────┘</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">                        </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│ 1. login(user, pass) <span class="Apple-converted-space">  </span>│<span class="Apple-converted-space">                        </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>├────────────────────────&gt;│<span class="Apple-converted-space">                        </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│ 2. findUserByUsername()│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>├────────────────────────&gt;│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">                        </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">                        </span>│ 3. getConnection()</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">                        </span>├─────────────┐</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">  </span>┌─────────▼───────┐</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">  </span>│ <span class="Apple-converted-space">  </span>HikariCP <span class="Apple-converted-space">    </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">  </span>│ Connection Pool│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">  </span>└─────────────────┘</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">                        </span>│ 4. SELECT * FROM users</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">                        </span>├─────────────┐</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">  </span>┌─────────▼───────┐</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">  </span>│<span class="Apple-converted-space">  </span>H2 Database <span class="Apple-converted-space">  </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">  </span>│ (File System)<span class="Apple-converted-space">  </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">                        </span>│<span class="Apple-converted-space">  </span>└─────────────────┘</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│ 5. User object <span class="Apple-converted-space">        </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│&lt;────────────────────────┤</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│ 6. BCrypt.checkpw()<span class="Apple-converted-space">    </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>├─────────────┐<span class="Apple-converted-space">          </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│ <span class="Apple-converted-space">            </span>│<span class="Apple-converted-space">          </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">                        </span>│&lt;────────────┘<span class="Apple-converted-space">          </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│ 7. AuthenticationResult│<span class="Apple-converted-space">                        </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│&lt;────────────────────────┤<span class="Apple-converted-space">                        </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│ 8. SessionManager. <span class="Apple-converted-space">    </span>│<span class="Apple-converted-space">                        </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│<span class="Apple-converted-space">    </span>startSession()<span class="Apple-converted-space">      </span>│<span class="Apple-converted-space">                        </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>├─────────────┐<span class="Apple-converted-space">          </span>│<span class="Apple-converted-space">                        </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│ <span class="Apple-converted-space">            </span>│<span class="Apple-converted-space">          </span>│<span class="Apple-converted-space">                        </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│&lt;────────────┘<span class="Apple-converted-space">          </span>│<span class="Apple-converted-space">                        </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│ 9. MainWindow()<span class="Apple-converted-space">        </span>│<span class="Apple-converted-space">                        </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>├─────────────┐<span class="Apple-converted-space">          </span>│<span class="Apple-converted-space">                        </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│ <span class="Apple-converted-space">            </span>│<span class="Apple-converted-space">          </span>│<span class="Apple-converted-space">                        </span>│</p>
+<p class="p1"><span class="Apple-converted-space">         </span>│&lt;────────────┘<span class="Apple-converted-space">          </span>│<span class="Apple-converted-space">                        </span>│</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">### 7.2 News Search Data Flow</p>
+<p class="p1">```</p>
+<p class="p1">┌──────────────┐<span class="Apple-converted-space">  </span>┌─────────────┐<span class="Apple-converted-space">  </span>┌─────────────┐<span class="Apple-converted-space">  </span>┌─────────────┐<span class="Apple-converted-space">  </span>┌────────────┐</p>
+<p class="p1">│ MainWindow <span class="Apple-converted-space">  </span>│<span class="Apple-converted-space">  </span>│ NewsApiSvc<span class="Apple-converted-space">  </span>│<span class="Apple-converted-space">  </span>│DatabaseSvc<span class="Apple-converted-space">  </span>│<span class="Apple-converted-space">  </span>│ HikariCP<span class="Apple-converted-space">    </span>│<span class="Apple-converted-space">  </span>│ H2Database │</p>
+<p class="p1">│ (Frontend) <span class="Apple-converted-space">  </span>│<span class="Apple-converted-space">  </span>│ (Backend) <span class="Apple-converted-space">  </span>│<span class="Apple-converted-space">  </span>│(Data Layer) │<span class="Apple-converted-space">  </span>│(Conn Pool)<span class="Apple-converted-space">  </span>│<span class="Apple-converted-space">  </span>│(Storage) <span class="Apple-converted-space">  </span>│</p>
+<p class="p1">└──────────────┘<span class="Apple-converted-space">  </span>└─────────────┘<span class="Apple-converted-space">  </span>└─────────────┘<span class="Apple-converted-space">  </span>└─────────────┘<span class="Apple-converted-space">  </span>└────────────┘</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ 1. fetchNews()<span class="Apple-converted-space">  </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>├─────────────────&gt;│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>│ 2. External <span class="Apple-converted-space">  </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>│<span class="Apple-converted-space">    </span>API Call <span class="Apple-converted-space">  </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>├───────────────┐ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>│&lt;──────────────┘ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>│ 3. saveSearchHistory()<span class="Apple-converted-space">        </span>│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>├─────────────────────────────&gt;│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>│ <span class="Apple-converted-space">              </span>│ 4. getConnection()<span class="Apple-converted-space">            </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>│ <span class="Apple-converted-space">              </span>├─────────────&gt;│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>│ <span class="Apple-converted-space">              </span>│ 5. Connection │ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>│ <span class="Apple-converted-space">              </span>│&lt;──────────────┤ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>│ <span class="Apple-converted-space">              </span>│ 6. INSERT INTO search_history │</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>│ <span class="Apple-converted-space">              </span>├─────────────────────────────&gt;│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>│ <span class="Apple-converted-space">              </span>│ 7. Rows affected<span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>│ <span class="Apple-converted-space">              </span>│&lt;──────────────────────────────┤</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>│ 8. Success<span class="Apple-converted-space">    </span>│ 8. returnConnection() <span class="Apple-converted-space">        </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ <span class="Apple-converted-space">                </span>│&lt;──────────────────────────────┤─────────────&gt;│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ 9. NewsResponse │ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│&lt;─────────────────┤ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│ 10. updateUI()<span class="Apple-converted-space">  </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>├──────────┐<span class="Apple-converted-space">      </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│<span class="Apple-converted-space">          </span>│<span class="Apple-converted-space">      </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1"><span class="Apple-converted-space">       </span>│&lt;─────────┘<span class="Apple-converted-space">      </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│ <span class="Apple-converted-space">              </span>│</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">---</p>
+<p class="p2"><br></p>
+<p class="p1">## 8. Security Implementation</p>
+<p class="p2"><br></p>
+<p class="p1">### 8.1 Password Security</p>
+<p class="p1">```java</p>
+<p class="p1">// AuthenticationService.java - Secure password handling</p>
+<p class="p1">public class AuthenticationService {</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Password hashing during registration</p>
+<p class="p1"><span class="Apple-converted-space">    </span>public AuthenticationResult register(String username, String email, String password,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                                       </span>String confirmPassword, String firstName, String lastName) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// ... validation code ...</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Generate salt and hash password (BCrypt automatically handles salt)</p>
+<p class="p1"><span class="Apple-converted-space">        </span>String passwordHash = BCrypt.hashpw(password, BCrypt.gensalt());</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Create user with hashed password (never store plain text)</p>
+<p class="p1"><span class="Apple-converted-space">        </span>User user = new User(username, email, passwordHash, firstName, lastName);</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// ... save to database ...</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Password verification during login</p>
+<p class="p1"><span class="Apple-converted-space">    </span>public AuthenticationResult login(String username, String password) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// ... find user in database ...</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Verify password against stored hash</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (!BCrypt.checkpw(password, user.getPasswordHash())) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return AuthenticationResult.failure("Invalid username or password");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Password is correct, proceed with login</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// ... update last login ...</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">### 8.2 SQL Injection Prevention</p>
+<p class="p1">```java</p>
+<p class="p1">// DatabaseService.java - Safe database queries</p>
+<p class="p1">public User findUserByUsername(String username) throws SQLException {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// SECURE: Using PreparedStatement with parameter binding</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String sql = "SELECT * FROM users WHERE username = ? AND is_active = TRUE";</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>try (Connection conn = dataSource.getConnection();</p>
+<p class="p1"><span class="Apple-converted-space">         </span>PreparedStatement stmt = conn.prepareStatement(sql)) {</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Parameter binding prevents SQL injection</p>
+<p class="p1"><span class="Apple-converted-space">        </span>stmt.setString(1, username);</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>try (ResultSet rs = stmt.executeQuery()) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (rs.next()) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return mapResultSetToUser(rs);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>return null;</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">// INSECURE EXAMPLE (DON'T DO THIS):</p>
+<p class="p1">// String sql = "SELECT * FROM users WHERE username = '" + username + "'";</p>
+<p class="p1">// This would be vulnerable to SQL injection attacks</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">### 8.3 Resource Management and Cleanup</p>
+<p class="p1">```java</p>
+<p class="p1">// DatabaseService.java - Proper resource management</p>
+<p class="p1">public List&lt;SearchHistory&gt; getUserSearchHistory(Long userId, int limit) throws SQLException {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String sql = "SELECT * FROM search_history WHERE user_id = ? ORDER BY searched_at DESC" +<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>(limit &gt; 0 ? " LIMIT ?" : "");</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>List&lt;SearchHistory&gt; history = new ArrayList&lt;&gt;();</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Try-with-resources ensures automatic resource cleanup</p>
+<p class="p1"><span class="Apple-converted-space">    </span>try (Connection conn = dataSource.getConnection();</p>
+<p class="p1"><span class="Apple-converted-space">         </span>PreparedStatement stmt = conn.prepareStatement(sql)) {</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>stmt.setLong(1, userId);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (limit &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>stmt.setInt(2, limit);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>try (ResultSet rs = stmt.executeQuery()) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>while (rs.next()) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>history.add(mapResultSetToSearchHistory(rs));</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// ResultSet automatically closed here</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Connection and PreparedStatement automatically closed here</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>return history;</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">---</p>
+<p class="p2"><br></p>
+<p class="p1">## 9. Error Handling and Logging</p>
+<p class="p2"><br></p>
+<p class="p1">### 9.1 Comprehensive Error Handling</p>
+<p class="p1">```java</p>
+<p class="p1">// AuthenticationService.java - Robust error handling</p>
+<p class="p1">public AuthenticationResult login(String username, String password) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Validate input parameters</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (username == null || username.trim().isEmpty()) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return AuthenticationResult.failure("Username is required");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (password == null || password.isEmpty()) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return AuthenticationResult.failure("Password is required");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Attempt database operations</p>
+<p class="p1"><span class="Apple-converted-space">        </span>User user = databaseService.findUserByUsername(username.trim());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (user == null) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Log security event but don't reveal specifics to user</p>
+<p class="p1"><span class="Apple-converted-space">            </span>logger.warn("Login attempt for non-existent user: {}", username);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return AuthenticationResult.failure("Invalid username or password");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Verify password</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (!BCrypt.checkpw(password, user.getPasswordHash())) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>logger.warn("Invalid password attempt for user: {}", username);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return AuthenticationResult.failure("Invalid username or password");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Update last login</p>
+<p class="p1"><span class="Apple-converted-space">        </span>databaseService.updateLastLogin(user.getId());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>user.setLastLoginAt(LocalDateTime.now());</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>logger.info("Successful login for user: {}", username);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return AuthenticationResult.success(user, "Login successful");</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>} catch (SQLException e) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Log technical details but provide user-friendly message</p>
+<p class="p1"><span class="Apple-converted-space">        </span>logger.error("Database error during login for user: {}", username, e);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return AuthenticationResult.failure("Login failed due to system error. Please try again.");</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>} catch (Exception e) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Catch any unexpected errors</p>
+<p class="p1"><span class="Apple-converted-space">        </span>logger.error("Unexpected error during login for user: {}", username, e);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return AuthenticationResult.failure("An unexpected error occurred. Please try again.");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">### 9.2 Frontend Error Handling</p>
+<p class="p1">```java</p>
+<p class="p1">// LoginWindow.java - GUI error handling</p>
+<p class="p1">private void handleLogin() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String username = loginUsernameField.getText();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String password = new String(loginPasswordField.getPassword());</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>showLoadingState(true);</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>SwingWorker&lt;AuthenticationResult, Void&gt; loginWorker = new SwingWorker&lt;AuthenticationResult, Void&gt;() {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@Override</p>
+<p class="p1"><span class="Apple-converted-space">        </span>protected AuthenticationResult doInBackground() throws Exception {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return authService.login(username, password);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>@Override</p>
+<p class="p1"><span class="Apple-converted-space">        </span>protected void done() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>AuthenticationResult result = get();</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>showLoadingState(false);</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (result.isSuccess()) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Success path</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>SessionManager.getInstance().startSession(result.getUser());</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>showMessage("Welcome back, " + result.getUser().getFirstName() + "!", false);</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Clear sensitive data</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Arrays.fill(loginPasswordField.getPassword(), ' ');</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Navigate to main window</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>openMainWindow();</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Failure path - show user-friendly error</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>showMessage(result.getMessage(), true);</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Clear password field for security</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>loginPasswordField.setText("");</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>loginPasswordField.requestFocus();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>} catch (InterruptedException e) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>logger.warn("Login operation was interrupted", e);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>showMessage("Login was interrupted. Please try again.", true);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>Thread.currentThread().interrupt();</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>} catch (ExecutionException e) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>Throwable cause = e.getCause();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>logger.error("Error during login execution", cause);</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>String userMessage = "Login failed. ";</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (cause instanceof SQLException) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>userMessage += "Database connection error. Please try again later.";</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>userMessage += "Please check your connection and try again.";</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>showMessage(userMessage, true);</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>} finally {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>showLoadingState(false);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>loginWorker.execute();</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">---</p>
+<p class="p2"><br></p>
+<p class="p1">## 10. Performance Optimization Techniques</p>
+<p class="p2"><br></p>
+<p class="p1">### 10.1 Connection Pool Optimization</p>
+<p class="p1">```java</p>
+<p class="p1">// DatabaseService.java - Optimized connection pool settings</p>
+<p class="p1">private void initializeDatabase() {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>HikariConfig config = new HikariConfig();</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Connection settings</p>
+<p class="p1"><span class="Apple-converted-space">    </span>config.setJdbcUrl("jdbc:h2:./data/newsvisualizer;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>config.setUsername("sa");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>config.setPassword("");</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Pool sizing (adjust based on application load)</p>
+<p class="p1"><span class="Apple-converted-space">    </span>config.setMaximumPoolSize(10);<span class="Apple-converted-space">          </span>// Max concurrent connections</p>
+<p class="p1"><span class="Apple-converted-space">    </span>config.setMinimumIdle(2); <span class="Apple-converted-space">              </span>// Keep minimum connections ready</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Timeout settings</p>
+<p class="p1"><span class="Apple-converted-space">    </span>config.setConnectionTimeout(30000); <span class="Apple-converted-space">    </span>// 30 seconds to get connection</p>
+<p class="p1"><span class="Apple-converted-space">    </span>config.setIdleTimeout(600000);<span class="Apple-converted-space">          </span>// 10 minutes before idle connection removed</p>
+<p class="p1"><span class="Apple-converted-space">    </span>config.setMaxLifetime(1800000); <span class="Apple-converted-space">        </span>// 30 minutes max connection age</p>
+<p class="p1"><span class="Apple-converted-space">    </span>config.setLeakDetectionThreshold(60000); // 60 seconds to detect connection leaks</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Performance optimizations</p>
+<p class="p1"><span class="Apple-converted-space">    </span>config.addDataSourceProperty("cachePrepStmts", "true");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>config.addDataSourceProperty("prepStmtCacheSize", "250");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>config.addDataSourceProperty("useServerPrepStmts", "true");</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>this.dataSource = new HikariDataSource(config);</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">### 10.2 Batch Operations</p>
+<p class="p1">```java</p>
+<p class="p1">// DatabaseService.java - Efficient batch operations</p>
+<p class="p1">public void saveMultipleSearchHistory(List&lt;SearchHistory&gt; historyList) throws SQLException {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>String sql = "INSERT INTO search_history (user_id, search_type, search_query, country, category, articles_found, analysis_results, searched_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>try (Connection conn = dataSource.getConnection();</p>
+<p class="p1"><span class="Apple-converted-space">         </span>PreparedStatement stmt = conn.prepareStatement(sql)) {</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Disable auto-commit for batch operation</p>
+<p class="p1"><span class="Apple-converted-space">        </span>conn.setAutoCommit(false);</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>for (SearchHistory history : historyList) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>stmt.setLong(1, history.getUserId());</p>
+<p class="p1"><span class="Apple-converted-space">            </span>stmt.setString(2, history.getSearchType());</p>
+<p class="p1"><span class="Apple-converted-space">            </span>stmt.setString(3, history.getSearchQuery());</p>
+<p class="p1"><span class="Apple-converted-space">            </span>stmt.setString(4, history.getCountry());</p>
+<p class="p1"><span class="Apple-converted-space">            </span>stmt.setString(5, history.getCategory());</p>
+<p class="p1"><span class="Apple-converted-space">            </span>stmt.setInt(6, history.getArticlesFound());</p>
+<p class="p1"><span class="Apple-converted-space">            </span>stmt.setString(7, history.getAnalysisResults());</p>
+<p class="p1"><span class="Apple-converted-space">            </span>stmt.setTimestamp(8, Timestamp.valueOf(history.getSearchedAt()));</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>stmt.addBatch();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Execute all statements at once</p>
+<p class="p1"><span class="Apple-converted-space">        </span>int[] results = stmt.executeBatch();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>conn.commit();</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>logger.info("Batch saved {} search history records", results.length);</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>} catch (SQLException e) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>logger.error("Error during batch insert", e);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>throw e;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1">}</p>
+<p class="p1">```</p>
+<p class="p2"><br></p>
+<p class="p1">---</p>
+<p class="p2"><br></p>
+<p class="p1">## Conclusion</p>
+<p class="p2"><br></p>
+<p class="p1">This comprehensive guide demonstrates how the NewsVisualizer application implements robust database connectivity using:</p>
+<p class="p2"><br></p>
+<p class="p1">1. **JDBC with H2 Database**: Lightweight, embedded database perfect for desktop applications</p>
+<p class="p1">2. **HikariCP Connection Pooling**: High-performance connection management</p>
+<p class="p1">3. **Layered Architecture**: Clear separation between GUI, business logic, and data access</p>
+<p class="p1">4. **Security Best Practices**: BCrypt password hashing and SQL injection prevention</p>
+<p class="p1">5. **Proper Resource Management**: Automatic cleanup and connection pooling</p>
+<p class="p1">6. **Comprehensive Error Handling**: User-friendly errors with detailed logging</p>
+<p class="p1">7. **Performance Optimization**: Connection pooling and prepared statement caching</p>
+<p class="p2"><br></p>
+<p class="p1">The integration flows seamlessly from frontend GUI components through backend services to the database layer, providing a solid foundation for user management and data persistence in the news visualization application.</p>
+</body>
+</html>

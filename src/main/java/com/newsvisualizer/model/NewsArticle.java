@@ -145,12 +145,12 @@ public class NewsArticle {
     }
     
     /**
-     * Get sentiment as text
+     * Get sentiment as text with emojis
      */
     public String getSentimentText() {
-        if (sentimentScore > 0.1) return "Positive";
-        if (sentimentScore < -0.1) return "Negative";
-        return "Neutral";
+        if (sentimentScore > 0.05) return "😀 Positive";
+        if (sentimentScore < -0.05) return "😞 Negative";
+        return "😐 Neutral";
     }
     
     @Override

@@ -1,6 +1,7 @@
 package com.newsvisualizer;
 
 import com.newsvisualizer.gui.MainWindow;
+import com.newsvisualizer.gui.LoginWindowNew;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,11 +20,10 @@ public class NewsVisualizerApp {
         // Set system look and feel
         setLookAndFeel();
         
-        // Create and show the main window
+        // Create and show the login window
         SwingUtilities.invokeLater(() -> {
             try {
-                MainWindow mainWindow = new MainWindow();
-                mainWindow.setVisible(true);
+                new LoginWindowNew();
                 logger.info("News Visualizer Application started successfully");
             } catch (Exception e) {
                 logger.error("Failed to start News Visualizer Application", e);
@@ -39,13 +39,13 @@ public class NewsVisualizerApp {
     private static void setLookAndFeel() {
         try {
             // Try to use system look and feel
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeel());
-            logger.info("Using system look and feel: {}", UIManager.getSystemLookAndFeel().getClass().getName());
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            logger.info("Using system look and feel: {}", UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             logger.warn("Could not set system look and feel, using default", e);
             try {
                 // Fallback to cross-platform look and feel
-                UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeel());
+                UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
             } catch (Exception e2) {
                 logger.warn("Could not set cross-platform look and feel either", e2);
             }
@@ -69,4 +69,5 @@ public class NewsVisualizerApp {
             JOptionPane.ERROR_MESSAGE
         );
     }
+    
 }

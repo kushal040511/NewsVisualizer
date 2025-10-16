@@ -53,8 +53,8 @@ public class NewsAnalyzerTest {
         assertTrue(positiveArticle.getSentimentScore() > 0, "Positive article should have positive sentiment score");
         assertTrue(negativeArticle.getSentimentScore() < 0, "Negative article should have negative sentiment score");
         
-        assertEquals("Positive", positiveArticle.getSentimentText());
-        assertEquals("Negative", negativeArticle.getSentimentText());
+        assertEquals("😀 Positive", positiveArticle.getSentimentText());
+        assertEquals("😞 Negative", negativeArticle.getSentimentText());
     }
     
     @Test
@@ -116,9 +116,9 @@ public class NewsAnalyzerTest {
         
         // Check results
         assertEquals(3, distribution.size(), "Should have 3 sentiment categories");
-        assertTrue(distribution.containsKey("Positive"));
-        assertTrue(distribution.containsKey("Negative")); 
-        assertTrue(distribution.containsKey("Neutral"));
+        assertTrue(distribution.containsKey("😀 Positive"));
+        assertTrue(distribution.containsKey("😞 Negative")); 
+        assertTrue(distribution.containsKey("😐 Neutral"));
     }
     
     @Test
