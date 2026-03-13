@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Database_JDBC_Integration_Guide</title>
+  <style>
+
+html {
+color: #1a1a1a;
+background-color: #fdfdfd;
+}
+body {
+margin: 0 auto;
+max-width: 36em;
+padding-left: 50px;
+padding-right: 50px;
+padding-top: 50px;
+padding-bottom: 50px;
+hyphens: auto;
+overflow-wrap: break-word;
+text-rendering: optimizeLegibility;
+font-kerning: normal;
+}
+@media (max-width: 600px) {
+body {
+font-size: 0.9em;
+padding: 12px;
+}
+h1 {
+font-size: 1.8em;
+}
+}
+@media print {
+html {
+background-color: white;
+}
+body {
+background-color: transparent;
+color: black;
+font-size: 12pt;
+}
+p, h2, h3 {
+orphans: 3;
+widows: 3;
+}
+h2, h3, h4 {
+page-break-after: avoid;
+}
+}
+p {
+margin: 1em 0;
+}
+a {
+color: #1a1a1a;
+}
+a:visited {
+color: #1a1a1a;
+}
+img {
+max-width: 100%;
+}
+svg {
+height: auto;
+max-width: 100%;
+}
+h1, h2, h3, h4, h5, h6 {
+margin-top: 1.4em;
+}
+h5, h6 {
+font-size: 1em;
+font-style: italic;
+}
+h6 {
+font-weight: normal;
+}
+ol, ul {
+padding-left: 1.7em;
+margin-top: 1em;
+}
+li > ol, li > ul {
+margin-top: 0;
+}
+blockquote {
+margin: 1em 0 1em 1.7em;
+padding-left: 1em;
+border-left: 2px solid #e6e6e6;
+color: #606060;
+}
+code {
+font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+font-size: 85%;
+margin: 0;
+hyphens: manual;
+}
+pre {
+margin: 1em 0;
+overflow: auto;
+}
+pre code {
+padding: 0;
+overflow: visible;
+overflow-wrap: normal;
+}
+.sourceCode {
+background-color: transparent;
+overflow: visible;
+}
+hr {
+border: none;
+border-top: 1px solid #1a1a1a;
+height: 1px;
+margin: 1em 0;
+}
+table {
+margin: 1em 0;
+border-collapse: collapse;
+width: 100%;
+overflow-x: auto;
+display: block;
+font-variant-numeric: lining-nums tabular-nums;
+}
+table caption {
+margin-bottom: 0.75em;
+}
+tbody {
+margin-top: 0.5em;
+border-top: 1px solid #1a1a1a;
+border-bottom: 1px solid #1a1a1a;
+}
+th {
+border-top: 1px solid #1a1a1a;
+padding: 0.25em 0.5em 0.25em 0.5em;
+}
+td {
+padding: 0.125em 0.5em 0.25em 0.5em;
+}
+header {
+margin-bottom: 4em;
+text-align: center;
+}
+#TOC li {
+list-style: none;
+}
+#TOC ul {
+padding-left: 1.3em;
+}
+#TOC > ul {
+padding-left: 0;
+}
+#TOC a:not(:hover) {
+text-decoration: none;
+}
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#newsvisualizer-database-jdbc-integration-guide" id="toc-newsvisualizer-database-jdbc-integration-guide"><span class="toc-section-number">1</span> NewsVisualizer Database JDBC
+Integration Guide</a>
+<ul>
+<li><a href="#complete-step-by-step-database-connectivity-explanation" id="toc-complete-step-by-step-database-connectivity-explanation"><span class="toc-section-number">1.1</span> Complete Step-by-Step Database
+Connectivity Explanation</a></li>
+<li><a href="#table-of-contents" id="toc-table-of-contents"><span class="toc-section-number">1.2</span> Table of Contents</a></li>
+<li><a href="#architecture-overview" id="toc-architecture-overview"><span class="toc-section-number">1.3</span> 1. Architecture Overview</a>
+<ul>
+<li><a href="#technology-stack" id="toc-technology-stack"><span class="toc-section-number">1.3.1</span> 1.1 Technology Stack</a></li>
+<li><a href="#architecture-layers" id="toc-architecture-layers"><span class="toc-section-number">1.3.2</span> 1.2 Architecture Layers</a></li>
+</ul></li>
+<li><a href="#jdbc-setup-and-configuration" id="toc-jdbc-setup-and-configuration"><span class="toc-section-number">1.4</span> 2. JDBC Setup and
+Configuration</a>
+<ul>
+<li><a href="#maven-dependencies-pom.xml" id="toc-maven-dependencies-pom.xml"><span class="toc-section-number">1.4.1</span> 2.1 Maven Dependencies
+(pom.xml)</a></li>
+<li><a href="#database-configuration-parameters" id="toc-database-configuration-parameters"><span class="toc-section-number">1.4.2</span> 2.2 Database Configuration
+Parameters</a></li>
+</ul></li>
+<li><a href="#database-initialization-process" id="toc-database-initialization-process"><span class="toc-section-number">1.5</span> 3. Database Initialization
+Process</a>
+<ul>
+<li><a href="#step-1-connection-pool-setup" id="toc-step-1-connection-pool-setup"><span class="toc-section-number">1.5.1</span> 3.1 Step 1: Connection Pool
+Setup</a></li>
+<li><a href="#step-2-table-creation" id="toc-step-2-table-creation"><span class="toc-section-number">1.5.2</span> 3.2 Step 2: Table
+Creation</a></li>
+</ul></li>
+<li><a href="#backend-database-integration" id="toc-backend-database-integration"><span class="toc-section-number">1.6</span> 4. Backend Database
+Integration</a>
+<ul>
+<li><a href="#singleton-databaseservice-pattern" id="toc-singleton-databaseservice-pattern"><span class="toc-section-number">1.6.1</span> 4.1 Singleton DatabaseService
+Pattern</a></li>
+<li><a href="#user-management-operations" id="toc-user-management-operations"><span class="toc-section-number">1.6.2</span> 4.2 User Management
+Operations</a></li>
+<li><a href="#authentication-service-integration" id="toc-authentication-service-integration"><span class="toc-section-number">1.6.3</span> 4.3 Authentication Service
+Integration</a></li>
+</ul></li>
+<li><a href="#frontend-database-integration" id="toc-frontend-database-integration"><span class="toc-section-number">1.7</span> 5. Frontend Database
+Integration</a>
+<ul>
+<li><a href="#login-window-integration" id="toc-login-window-integration"><span class="toc-section-number">1.7.1</span> 5.1 Login Window
+Integration</a></li>
+<li><a href="#main-window-search-history-integration" id="toc-main-window-search-history-integration"><span class="toc-section-number">1.7.2</span> 5.2 Main Window Search History
+Integration</a></li>
+<li><a href="#user-profile-window-integration" id="toc-user-profile-window-integration"><span class="toc-section-number">1.7.3</span> 5.3 User Profile Window
+Integration</a></li>
+</ul></li>
+<li><a href="#complete-code-examples" id="toc-complete-code-examples"><span class="toc-section-number">1.8</span> 6. Complete Code Examples</a>
+<ul>
+<li><a href="#complete-user-registration-flow" id="toc-complete-user-registration-flow"><span class="toc-section-number">1.8.1</span> 6.1 Complete User Registration
+Flow</a></li>
+<li><a href="#connection-pool-management-example" id="toc-connection-pool-management-example"><span class="toc-section-number">1.8.2</span> 6.2 Connection Pool Management
+Example</a></li>
+</ul></li>
+<li><a href="#data-flow-diagrams" id="toc-data-flow-diagrams"><span class="toc-section-number">1.9</span> 7. Data Flow Diagrams</a>
+<ul>
+<li><a href="#user-authentication-data-flow" id="toc-user-authentication-data-flow"><span class="toc-section-number">1.9.1</span> 7.1 User Authentication Data
+Flow</a></li>
+<li><a href="#news-search-data-flow" id="toc-news-search-data-flow"><span class="toc-section-number">1.9.2</span> 7.2 News Search Data
+Flow</a></li>
+</ul></li>
+<li><a href="#security-implementation" id="toc-security-implementation"><span class="toc-section-number">1.10</span> 8. Security Implementation</a>
+<ul>
+<li><a href="#password-security" id="toc-password-security"><span class="toc-section-number">1.10.1</span> 8.1 Password Security</a></li>
+<li><a href="#sql-injection-prevention" id="toc-sql-injection-prevention"><span class="toc-section-number">1.10.2</span> 8.2 SQL Injection
+Prevention</a></li>
+<li><a href="#resource-management-and-cleanup" id="toc-resource-management-and-cleanup"><span class="toc-section-number">1.10.3</span> 8.3 Resource Management and
+Cleanup</a></li>
+</ul></li>
+<li><a href="#error-handling-and-logging" id="toc-error-handling-and-logging"><span class="toc-section-number">1.11</span> 9. Error Handling and Logging</a>
+<ul>
+<li><a href="#comprehensive-error-handling" id="toc-comprehensive-error-handling"><span class="toc-section-number">1.11.1</span> 9.1 Comprehensive Error
+Handling</a></li>
+<li><a href="#frontend-error-handling" id="toc-frontend-error-handling"><span class="toc-section-number">1.11.2</span> 9.2 Frontend Error
+Handling</a></li>
+</ul></li>
+<li><a href="#performance-optimization-techniques" id="toc-performance-optimization-techniques"><span class="toc-section-number">1.12</span> 10. Performance Optimization
+Techniques</a>
+<ul>
+<li><a href="#connection-pool-optimization" id="toc-connection-pool-optimization"><span class="toc-section-number">1.12.1</span> 10.1 Connection Pool
+Optimization</a></li>
+<li><a href="#batch-operations" id="toc-batch-operations"><span class="toc-section-number">1.12.2</span> 10.2 Batch Operations</a></li>
+</ul></li>
+<li><a href="#conclusion" id="toc-conclusion"><span class="toc-section-number">1.13</span> Conclusion</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 data-number="1" id="newsvisualizer-database-jdbc-integration-guide"><span class="header-section-number">1</span> NewsVisualizer Database JDBC
+Integration Guide</h1>
+<h2 data-number="1.1" id="complete-step-by-step-database-connectivity-explanation"><span class="header-section-number">1.1</span> Complete Step-by-Step Database
+Connectivity Explanation</h2>
+<hr />
+<h2 data-number="1.2" id="table-of-contents"><span class="header-section-number">1.2</span> Table of Contents</h2>
+<ol type="1">
+<li><a href="#architecture-overview">Architecture Overview</a></li>
+<li><a href="#jdbc-setup-and-configuration">JDBC Setup and
+Configuration</a></li>
+<li><a href="#database-initialization-process">Database Initialization
+Process</a></li>
+<li><a href="#backend-database-integration">Backend Database
+Integration</a></li>
+<li><a href="#frontend-database-integration">Frontend Database
+Integration</a></li>
+<li><a href="#complete-code-examples">Complete Code Examples</a></li>
+<li><a href="#data-flow-diagrams">Data Flow Diagrams</a></li>
+<li><a href="#security-implementation">Security Implementation</a></li>
+</ol>
+<hr />
+<h2 data-number="1.3" id="architecture-overview"><span class="header-section-number">1.3</span> 1. Architecture Overview</h2>
+<h3 data-number="1.3.1" id="technology-stack"><span class="header-section-number">1.3.1</span> 1.1 Technology Stack</h3>
+<ul>
+<li><strong>Database</strong>: H2 Database (Embedded file-based
+database)</li>
+<li><strong>Connection Pool</strong>: HikariCP (High-performance JDBC
+connection pool)</li>
+<li><strong>JDBC Driver</strong>: H2 JDBC Driver</li>
+<li><strong>Frontend</strong>: Java Swing GUI</li>
+<li><strong>Backend</strong>: Service Layer Pattern</li>
+<li><strong>Security</strong>: BCrypt password hashing</li>
+</ul>
+<h3 data-number="1.3.2" id="architecture-layers"><span class="header-section-number">1.3.2</span> 1.2 Architecture Layers</h3>
+<pre><code>Frontend (GUI Layer)
+    ↓ ↑
+Backend Services (Business Logic)
+    ↓ ↑
+Database Service (Data Access Layer)
+    ↓ ↑
+JDBC Connection Pool (HikariCP)
+    ↓ ↑
+H2 Database (Data Storage)</code></pre>
+<hr />
+<h2 data-number="1.4" id="jdbc-setup-and-configuration"><span class="header-section-number">1.4</span> 2. JDBC Setup and
+Configuration</h2>
+<h3 data-number="1.4.1" id="maven-dependencies-pom.xml"><span class="header-section-number">1.4.1</span> 2.1 Maven Dependencies
+(pom.xml)</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode xml"><code class="sourceCode xml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- H2 Database for user data --&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">dependency</span>&gt;</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">groupId</span>&gt;com.h2database&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">artifactId</span>&gt;h2&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">version</span>&gt;2.2.224&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">dependency</span>&gt;</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- HikariCP for database connection pooling --&gt;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">dependency</span>&gt;</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">groupId</span>&gt;com.zaxxer&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">artifactId</span>&gt;HikariCP&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">version</span>&gt;5.0.1&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">dependency</span>&gt;</span></code></pre></div>
+<h3 data-number="1.4.2" id="database-configuration-parameters"><span class="header-section-number">1.4.2</span> 2.2 Database Configuration
+Parameters</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// JDBC URL Breakdown</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>jdbc<span class="op">:</span>h2<span class="op">:./</span>data<span class="op">/</span>newsvisualizer<span class="op">;</span>DB_CLOSE_DELAY<span class="op">=-</span><span class="dv">1</span><span class="op">;</span>DB_CLOSE_ON_EXIT<span class="op">=</span>FALSE</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>Components<span class="op">:</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">-</span> jdbc<span class="op">:</span>h2<span class="op">:</span> <span class="op">=</span> H2 database protocol</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="op">-</span> <span class="op">./</span>data<span class="op">/</span>newsvisualizer <span class="op">=</span> Database file <span class="fu">location</span> <span class="op">(</span>relative path<span class="op">)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="op">-</span> DB_CLOSE_DELAY<span class="op">=-</span><span class="dv">1</span> <span class="op">=</span> Keep database open until application closes</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="op">-</span> DB_CLOSE_ON_EXIT<span class="op">=</span>FALSE <span class="op">=</span> Prevent automatic database shutdown</span></code></pre></div>
+<hr />
+<h2 data-number="1.5" id="database-initialization-process"><span class="header-section-number">1.5</span> 3. Database Initialization
+Process</h2>
+<h3 data-number="1.5.1" id="step-1-connection-pool-setup"><span class="header-section-number">1.5.1</span> 3.1 Step 1: Connection Pool
+Setup</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// DatabaseService.java - Connection Pool Initialization</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> <span class="dt">void</span> <span class="fu">initializeDatabase</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Create HikariCP configuration</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        HikariConfig config <span class="op">=</span> <span class="kw">new</span> <span class="fu">HikariConfig</span><span class="op">();</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Basic connection settings</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        config<span class="op">.</span><span class="fu">setJdbcUrl</span><span class="op">(</span><span class="st">&quot;jdbc:h2:./data/newsvisualizer;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE&quot;</span><span class="op">);</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        config<span class="op">.</span><span class="fu">setUsername</span><span class="op">(</span><span class="st">&quot;sa&quot;</span><span class="op">);</span>        <span class="co">// Default H2 username</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        config<span class="op">.</span><span class="fu">setPassword</span><span class="op">(</span><span class="st">&quot;&quot;</span><span class="op">);</span>          <span class="co">// Default H2 password (empty)</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Connection pool settings</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        config<span class="op">.</span><span class="fu">setMaximumPoolSize</span><span class="op">(</span><span class="dv">10</span><span class="op">);</span>           <span class="co">// Max 10 concurrent connections</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        config<span class="op">.</span><span class="fu">setConnectionTimeout</span><span class="op">(</span><span class="dv">30000</span><span class="op">);</span>      <span class="co">// 30 seconds timeout</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        config<span class="op">.</span><span class="fu">setIdleTimeout</span><span class="op">(</span><span class="dv">600000</span><span class="op">);</span>           <span class="co">// 10 minutes idle timeout</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        config<span class="op">.</span><span class="fu">setMaxLifetime</span><span class="op">(</span><span class="dv">1800000</span><span class="op">);</span>          <span class="co">// 30 minutes max connection life</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Performance optimizations</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        config<span class="op">.</span><span class="fu">addDataSourceProperty</span><span class="op">(</span><span class="st">&quot;cachePrepStmts&quot;</span><span class="op">,</span> <span class="st">&quot;true&quot;</span><span class="op">);</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        config<span class="op">.</span><span class="fu">addDataSourceProperty</span><span class="op">(</span><span class="st">&quot;prepStmtCacheSize&quot;</span><span class="op">,</span> <span class="st">&quot;250&quot;</span><span class="op">);</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        config<span class="op">.</span><span class="fu">addDataSourceProperty</span><span class="op">(</span><span class="st">&quot;prepStmtCacheSqlLimit&quot;</span><span class="op">,</span> <span class="st">&quot;2048&quot;</span><span class="op">);</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Create the data source (connection pool)</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">dataSource</span> <span class="op">=</span> <span class="kw">new</span> <span class="fu">HikariDataSource</span><span class="op">(</span>config<span class="op">);</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        logger<span class="op">.</span><span class="fu">info</span><span class="op">(</span><span class="st">&quot;Database initialized successfully&quot;</span><span class="op">);</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">Exception</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        logger<span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;Failed to initialize database&quot;</span><span class="op">,</span> e<span class="op">);</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">RuntimeException</span><span class="op">(</span><span class="st">&quot;Database initialization failed&quot;</span><span class="op">,</span> e<span class="op">);</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 data-number="1.5.2" id="step-2-table-creation"><span class="header-section-number">1.5.2</span> 3.2 Step 2: Table
+Creation</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// DatabaseService.java - Table Creation</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> <span class="dt">void</span> <span class="fu">createTables</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">(</span><span class="bu">Connection</span> conn <span class="op">=</span> dataSource<span class="op">.</span><span class="fu">getConnection</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Create users table SQL</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> createUsersTable <span class="op">=</span> <span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="st">            CREATE TABLE IF NOT EXISTS users (</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="st">                id BIGINT PRIMARY KEY AUTO_INCREMENT,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="st">                username VARCHAR(50) UNIQUE NOT NULL,</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="st">                email VARCHAR(100) UNIQUE NOT NULL,</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="st">                password_hash VARCHAR(255) NOT NULL,</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="st">                first_name VARCHAR(50),</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="st">                last_name VARCHAR(50),</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="st">                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="st">                last_login_at TIMESTAMP,</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="st">                is_active BOOLEAN DEFAULT TRUE</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="st">            )</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="st">        &quot;&quot;&quot;</span><span class="op">;</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Create search history table SQL</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> createSearchHistoryTable <span class="op">=</span> <span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="st">            CREATE TABLE IF NOT EXISTS search_history (</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="st">                id BIGINT PRIMARY KEY AUTO_INCREMENT,</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="st">                user_id BIGINT NOT NULL,</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="st">                search_type VARCHAR(20) NOT NULL,</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="st">                search_query VARCHAR(500),</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="st">                country VARCHAR(10),</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="st">                category VARCHAR(50),</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="st">                articles_found INTEGER DEFAULT 0,</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="st">                analysis_results TEXT,</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="st">                searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a><span class="st">                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="st">            )</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="st">        &quot;&quot;&quot;</span><span class="op">;</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Execute table creation statements</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">(</span><span class="bu">Statement</span> stmt <span class="op">=</span> conn<span class="op">.</span><span class="fu">createStatement</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>            stmt<span class="op">.</span><span class="fu">execute</span><span class="op">(</span>createUsersTable<span class="op">);</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>            stmt<span class="op">.</span><span class="fu">execute</span><span class="op">(</span>createSearchHistoryTable<span class="op">);</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>            logger<span class="op">.</span><span class="fu">info</span><span class="op">(</span><span class="st">&quot;Database tables created successfully&quot;</span><span class="op">);</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">SQLException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>        logger<span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;Failed to create database tables&quot;</span><span class="op">,</span> e<span class="op">);</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">RuntimeException</span><span class="op">(</span><span class="st">&quot;Table creation failed&quot;</span><span class="op">,</span> e<span class="op">);</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 data-number="1.6" id="backend-database-integration"><span class="header-section-number">1.6</span> 4. Backend Database
+Integration</h2>
+<h3 data-number="1.6.1" id="singleton-databaseservice-pattern"><span class="header-section-number">1.6.1</span> 4.1 Singleton DatabaseService
+Pattern</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// DatabaseService.java - Singleton Implementation</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> DatabaseService <span class="op">{</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> <span class="dt">final</span> <span class="bu">Logger</span> logger <span class="op">=</span> LoggerFactory<span class="op">.</span><span class="fu">getLogger</span><span class="op">(</span>DatabaseService<span class="op">.</span><span class="fu">class</span><span class="op">);</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">static</span> DatabaseService instance<span class="op">;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="bu">DataSource</span> dataSource<span class="op">;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Private constructor to prevent direct instantiation</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="fu">DatabaseService</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        <span class="fu">initializeDatabase</span><span class="op">();</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        <span class="fu">createTables</span><span class="op">();</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Thread-safe singleton instance retrieval</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">static</span> <span class="kw">synchronized</span> DatabaseService <span class="fu">getInstance</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>instance <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>            instance <span class="op">=</span> <span class="kw">new</span> <span class="fu">DatabaseService</span><span class="op">();</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> instance<span class="op">;</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 data-number="1.6.2" id="user-management-operations"><span class="header-section-number">1.6.2</span> 4.2 User Management
+Operations</h3>
+<h4 data-number="1.6.2.1" id="create-user-registration"><span class="header-section-number">1.6.2.1</span> 4.2.1 Create User
+(Registration)</h4>
+<div class="sourceCode" id="cb7"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// DatabaseService.java - User Creation</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> User <span class="fu">createUser</span><span class="op">(</span>User user<span class="op">)</span> <span class="kw">throws</span> <span class="bu">SQLException</span> <span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> sql <span class="op">=</span> <span class="st">&quot;INSERT INTO users (username, email, password_hash, first_name, last_name, created_at) VALUES (?, ?, ?, ?, ?, ?)&quot;</span><span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Use try-with-resources for automatic resource cleanup</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">(</span><span class="bu">Connection</span> conn <span class="op">=</span> dataSource<span class="op">.</span><span class="fu">getConnection</span><span class="op">();</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>         <span class="bu">PreparedStatement</span> stmt <span class="op">=</span> conn<span class="op">.</span><span class="fu">prepareStatement</span><span class="op">(</span>sql<span class="op">,</span> <span class="bu">Statement</span><span class="op">.</span><span class="fu">RETURN_GENERATED_KEYS</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Bind parameters to prevent SQL injection</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> user<span class="op">.</span><span class="fu">getUsername</span><span class="op">());</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">2</span><span class="op">,</span> user<span class="op">.</span><span class="fu">getEmail</span><span class="op">());</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">3</span><span class="op">,</span> user<span class="op">.</span><span class="fu">getPasswordHash</span><span class="op">());</span>      <span class="co">// BCrypt hashed password</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">4</span><span class="op">,</span> user<span class="op">.</span><span class="fu">getFirstName</span><span class="op">());</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">5</span><span class="op">,</span> user<span class="op">.</span><span class="fu">getLastName</span><span class="op">());</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        stmt<span class="op">.</span><span class="fu">setTimestamp</span><span class="op">(</span><span class="dv">6</span><span class="op">,</span> <span class="bu">Timestamp</span><span class="op">.</span><span class="fu">valueOf</span><span class="op">(</span>user<span class="op">.</span><span class="fu">getCreatedAt</span><span class="op">()));</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Execute the insert statement</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> rowsAffected <span class="op">=</span> stmt<span class="op">.</span><span class="fu">executeUpdate</span><span class="op">();</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>rowsAffected <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Retrieve the generated user ID</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span> <span class="op">(</span><span class="bu">ResultSet</span> rs <span class="op">=</span> stmt<span class="op">.</span><span class="fu">getGeneratedKeys</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="op">(</span>rs<span class="op">.</span><span class="fu">next</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>                    user<span class="op">.</span><span class="fu">setId</span><span class="op">(</span>rs<span class="op">.</span><span class="fu">getLong</span><span class="op">(</span><span class="dv">1</span><span class="op">));</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>                    logger<span class="op">.</span><span class="fu">info</span><span class="op">(</span><span class="st">&quot;User created successfully: {}&quot;</span><span class="op">,</span> user<span class="op">.</span><span class="fu">getUsername</span><span class="op">());</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">return</span> user<span class="op">;</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">SQLException</span><span class="op">(</span><span class="st">&quot;Failed to create user&quot;</span><span class="op">);</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 data-number="1.6.2.2" id="find-user-authentication"><span class="header-section-number">1.6.2.2</span> 4.2.2 Find User
+(Authentication)</h4>
+<div class="sourceCode" id="cb8"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// DatabaseService.java - User Lookup</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> User <span class="fu">findUserByUsername</span><span class="op">(</span><span class="bu">String</span> username<span class="op">)</span> <span class="kw">throws</span> <span class="bu">SQLException</span> <span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> sql <span class="op">=</span> <span class="st">&quot;SELECT * FROM users WHERE username = ? AND is_active = TRUE&quot;</span><span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">(</span><span class="bu">Connection</span> conn <span class="op">=</span> dataSource<span class="op">.</span><span class="fu">getConnection</span><span class="op">();</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>         <span class="bu">PreparedStatement</span> stmt <span class="op">=</span> conn<span class="op">.</span><span class="fu">prepareStatement</span><span class="op">(</span>sql<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> username<span class="op">);</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">(</span><span class="bu">ResultSet</span> rs <span class="op">=</span> stmt<span class="op">.</span><span class="fu">executeQuery</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>rs<span class="op">.</span><span class="fu">next</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="fu">mapResultSetToUser</span><span class="op">(</span>rs<span class="op">);</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">null</span><span class="op">;</span> <span class="co">// User not found</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">// Helper method to map database results to User object</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> User <span class="fu">mapResultSetToUser</span><span class="op">(</span><span class="bu">ResultSet</span> rs<span class="op">)</span> <span class="kw">throws</span> <span class="bu">SQLException</span> <span class="op">{</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    User user <span class="op">=</span> <span class="kw">new</span> <span class="fu">User</span><span class="op">();</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    user<span class="op">.</span><span class="fu">setId</span><span class="op">(</span>rs<span class="op">.</span><span class="fu">getLong</span><span class="op">(</span><span class="st">&quot;id&quot;</span><span class="op">));</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    user<span class="op">.</span><span class="fu">setUsername</span><span class="op">(</span>rs<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;username&quot;</span><span class="op">));</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    user<span class="op">.</span><span class="fu">setEmail</span><span class="op">(</span>rs<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;email&quot;</span><span class="op">));</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    user<span class="op">.</span><span class="fu">setPasswordHash</span><span class="op">(</span>rs<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;password_hash&quot;</span><span class="op">));</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    user<span class="op">.</span><span class="fu">setFirstName</span><span class="op">(</span>rs<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;first_name&quot;</span><span class="op">));</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    user<span class="op">.</span><span class="fu">setLastName</span><span class="op">(</span>rs<span class="op">.</span><span class="fu">getString</span><span class="op">(</span><span class="st">&quot;last_name&quot;</span><span class="op">));</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Handle timestamp conversion</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Timestamp</span> createdAt <span class="op">=</span> rs<span class="op">.</span><span class="fu">getTimestamp</span><span class="op">(</span><span class="st">&quot;created_at&quot;</span><span class="op">);</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>createdAt <span class="op">!=</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        user<span class="op">.</span><span class="fu">setCreatedAt</span><span class="op">(</span>createdAt<span class="op">.</span><span class="fu">toLocalDateTime</span><span class="op">());</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Timestamp</span> lastLoginAt <span class="op">=</span> rs<span class="op">.</span><span class="fu">getTimestamp</span><span class="op">(</span><span class="st">&quot;last_login_at&quot;</span><span class="op">);</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>lastLoginAt <span class="op">!=</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>        user<span class="op">.</span><span class="fu">setLastLoginAt</span><span class="op">(</span>lastLoginAt<span class="op">.</span><span class="fu">toLocalDateTime</span><span class="op">());</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    user<span class="op">.</span><span class="fu">setActive</span><span class="op">(</span>rs<span class="op">.</span><span class="fu">getBoolean</span><span class="op">(</span><span class="st">&quot;is_active&quot;</span><span class="op">));</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> user<span class="op">;</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 data-number="1.6.3" id="authentication-service-integration"><span class="header-section-number">1.6.3</span> 4.3 Authentication Service
+Integration</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// AuthenticationService.java - Backend Business Logic</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> AuthenticationService <span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">final</span> DatabaseService databaseService<span class="op">;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">AuthenticationService</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">this</span><span class="op">.</span><span class="fu">databaseService</span> <span class="op">=</span> DatabaseService<span class="op">.</span><span class="fu">getInstance</span><span class="op">();</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// User login authentication</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> AuthenticationResult <span class="fu">login</span><span class="op">(</span><span class="bu">String</span> username<span class="op">,</span> <span class="bu">String</span> password<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Validate input</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>username <span class="op">==</span> <span class="kw">null</span> <span class="op">||</span> username<span class="op">.</span><span class="fu">trim</span><span class="op">().</span><span class="fu">isEmpty</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span><span class="st">&quot;Username is required&quot;</span><span class="op">);</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>password <span class="op">==</span> <span class="kw">null</span> <span class="op">||</span> password<span class="op">.</span><span class="fu">isEmpty</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span><span class="st">&quot;Password is required&quot;</span><span class="op">);</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Find user in database (supports both username and email)</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>            User user<span class="op">;</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>username<span class="op">.</span><span class="fu">contains</span><span class="op">(</span><span class="st">&quot;@&quot;</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>                user <span class="op">=</span> databaseService<span class="op">.</span><span class="fu">findUserByEmail</span><span class="op">(</span>username<span class="op">.</span><span class="fu">trim</span><span class="op">());</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>                user <span class="op">=</span> databaseService<span class="op">.</span><span class="fu">findUserByUsername</span><span class="op">(</span>username<span class="op">.</span><span class="fu">trim</span><span class="op">());</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>user <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span><span class="st">&quot;Invalid username or password&quot;</span><span class="op">);</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Verify password using BCrypt</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(!</span>BCrypt<span class="op">.</span><span class="fu">checkpw</span><span class="op">(</span>password<span class="op">,</span> user<span class="op">.</span><span class="fu">getPasswordHash</span><span class="op">()))</span> <span class="op">{</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span><span class="st">&quot;Invalid username or password&quot;</span><span class="op">);</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Update last login timestamp</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>            databaseService<span class="op">.</span><span class="fu">updateLastLogin</span><span class="op">(</span>user<span class="op">.</span><span class="fu">getId</span><span class="op">());</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>            user<span class="op">.</span><span class="fu">setLastLoginAt</span><span class="op">(</span>LocalDateTime<span class="op">.</span><span class="fu">now</span><span class="op">());</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>            logger<span class="op">.</span><span class="fu">info</span><span class="op">(</span><span class="st">&quot;User logged in successfully: {}&quot;</span><span class="op">,</span> username<span class="op">);</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">success</span><span class="op">(</span>user<span class="op">,</span> <span class="st">&quot;Login successful&quot;</span><span class="op">);</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">SQLException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>            logger<span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;Database error during login&quot;</span><span class="op">,</span> e<span class="op">);</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span><span class="st">&quot;Login failed due to database error&quot;</span><span class="op">);</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">Exception</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>            logger<span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;Unexpected error during login&quot;</span><span class="op">,</span> e<span class="op">);</span></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span><span class="st">&quot;Login failed due to unexpected error&quot;</span><span class="op">);</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 data-number="1.7" id="frontend-database-integration"><span class="header-section-number">1.7</span> 5. Frontend Database
+Integration</h2>
+<h3 data-number="1.7.1" id="login-window-integration"><span class="header-section-number">1.7.1</span> 5.1 Login Window
+Integration</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// LoginWindow.java - Frontend Authentication</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> <span class="dt">void</span> <span class="fu">handleLogin</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> username <span class="op">=</span> loginUsernameField<span class="op">.</span><span class="fu">getText</span><span class="op">();</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> password <span class="op">=</span> <span class="kw">new</span> <span class="bu">String</span><span class="op">(</span>loginPasswordField<span class="op">.</span><span class="fu">getPassword</span><span class="op">());</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Show loading state</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">showLoadingState</span><span class="op">();</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Use SwingWorker for background database operations</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">SwingWorker</span><span class="op">&lt;</span>AuthenticationResult<span class="op">,</span> <span class="bu">Void</span><span class="op">&gt;</span> loginWorker <span class="op">=</span> <span class="kw">new</span> <span class="bu">SwingWorker</span><span class="op">&lt;</span>AuthenticationResult<span class="op">,</span> <span class="bu">Void</span><span class="op">&gt;()</span> <span class="op">{</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">@Override</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        <span class="kw">protected</span> AuthenticationResult <span class="fu">doInBackground</span><span class="op">()</span> <span class="kw">throws</span> <span class="bu">Exception</span> <span class="op">{</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>            <span class="co">// This runs on background thread - safe for database operations</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> authService<span class="op">.</span><span class="fu">login</span><span class="op">(</span>username<span class="op">,</span> password<span class="op">);</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">@Override</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>        <span class="kw">protected</span> <span class="dt">void</span> <span class="fu">done</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>                <span class="co">// This runs on EDT - safe for GUI updates</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>                AuthenticationResult result <span class="op">=</span> <span class="fu">get</span><span class="op">();</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>                <span class="fu">hideLoadingState</span><span class="op">();</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="op">(</span>result<span class="op">.</span><span class="fu">isSuccess</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// Start user session</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>                    SessionManager<span class="op">.</span><span class="fu">getInstance</span><span class="op">().</span><span class="fu">startSession</span><span class="op">(</span>result<span class="op">.</span><span class="fu">getUser</span><span class="op">());</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>                    </span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// Show success message</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">showMessage</span><span class="op">(</span><span class="st">&quot;Welcome back, &quot;</span> <span class="op">+</span> result<span class="op">.</span><span class="fu">getUser</span><span class="op">().</span><span class="fu">getFirstName</span><span class="op">()</span> <span class="op">+</span> <span class="st">&quot;!&quot;</span><span class="op">,</span> <span class="kw">false</span><span class="op">);</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>                    </span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// Navigate to main window</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">openMainWindow</span><span class="op">();</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>                    </span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// Show error message</span></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">showMessage</span><span class="op">(</span>result<span class="op">.</span><span class="fu">getMessage</span><span class="op">(),</span> <span class="kw">true</span><span class="op">);</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>                    </span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// Clear password field for security</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>                    loginPasswordField<span class="op">.</span><span class="fu">setText</span><span class="op">(</span><span class="st">&quot;&quot;</span><span class="op">);</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">Exception</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>                logger<span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;Error during login&quot;</span><span class="op">,</span> e<span class="op">);</span></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>                <span class="fu">hideLoadingState</span><span class="op">();</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>                <span class="fu">showMessage</span><span class="op">(</span><span class="st">&quot;Login failed: &quot;</span> <span class="op">+</span> e<span class="op">.</span><span class="fu">getMessage</span><span class="op">(),</span> <span class="kw">true</span><span class="op">);</span></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>    loginWorker<span class="op">.</span><span class="fu">execute</span><span class="op">();</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 data-number="1.7.2" id="main-window-search-history-integration"><span class="header-section-number">1.7.2</span> 5.2 Main Window Search
+History Integration</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">// MainWindow.java - Search History Tracking</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> <span class="dt">void</span> <span class="fu">fetchNews</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> country <span class="op">=</span> <span class="fu">getSelectedCountry</span><span class="op">();</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> category <span class="op">=</span> <span class="fu">getSelectedCategory</span><span class="op">();</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">SwingWorker</span><span class="op">&lt;</span>NewsResponse<span class="op">,</span> <span class="bu">Void</span><span class="op">&gt;</span> newsWorker <span class="op">=</span> <span class="kw">new</span> <span class="bu">SwingWorker</span><span class="op">&lt;</span>NewsResponse<span class="op">,</span> <span class="bu">Void</span><span class="op">&gt;()</span> <span class="op">{</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">@Override</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">protected</span> NewsResponse <span class="fu">doInBackground</span><span class="op">()</span> <span class="kw">throws</span> <span class="bu">Exception</span> <span class="op">{</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Fetch news from external API</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>            NewsResponse response <span class="op">=</span> newsService<span class="op">.</span><span class="fu">getTopHeadlines</span><span class="op">(</span>country<span class="op">,</span> category<span class="op">);</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Save search history to database</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>SessionManager<span class="op">.</span><span class="fu">getInstance</span><span class="op">().</span><span class="fu">isLoggedIn</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>                User currentUser <span class="op">=</span> SessionManager<span class="op">.</span><span class="fu">getInstance</span><span class="op">().</span><span class="fu">getCurrentUser</span><span class="op">();</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>                SearchHistory history <span class="op">=</span> <span class="kw">new</span> <span class="fu">SearchHistory</span><span class="op">();</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>                history<span class="op">.</span><span class="fu">setUserId</span><span class="op">(</span>currentUser<span class="op">.</span><span class="fu">getId</span><span class="op">());</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>                history<span class="op">.</span><span class="fu">setSearchType</span><span class="op">(</span><span class="st">&quot;news_search&quot;</span><span class="op">);</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>                history<span class="op">.</span><span class="fu">setSearchQuery</span><span class="op">(</span><span class="kw">null</span><span class="op">);</span> <span class="co">// No specific query for category search</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>                history<span class="op">.</span><span class="fu">setCountry</span><span class="op">(</span>country<span class="op">);</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>                history<span class="op">.</span><span class="fu">setCategory</span><span class="op">(</span>category<span class="op">);</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>                history<span class="op">.</span><span class="fu">setArticlesFound</span><span class="op">(</span>response<span class="op">.</span><span class="fu">getArticles</span><span class="op">().</span><span class="fu">size</span><span class="op">());</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>                history<span class="op">.</span><span class="fu">setSearchedAt</span><span class="op">(</span>LocalDateTime<span class="op">.</span><span class="fu">now</span><span class="op">());</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>                <span class="co">// Save to database (background thread safe)</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>                <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>                    DatabaseService<span class="op">.</span><span class="fu">getInstance</span><span class="op">().</span><span class="fu">saveSearchHistory</span><span class="op">(</span>history<span class="op">);</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>                    logger<span class="op">.</span><span class="fu">info</span><span class="op">(</span><span class="st">&quot;Search history saved for user: {}&quot;</span><span class="op">,</span> currentUser<span class="op">.</span><span class="fu">getUsername</span><span class="op">());</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">SQLException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>                    logger<span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;Failed to save search history&quot;</span><span class="op">,</span> e<span class="op">);</span></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// Don&#39;t fail the news fetch for history save failure</span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> response<span class="op">;</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>        <span class="at">@Override</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>        <span class="kw">protected</span> <span class="dt">void</span> <span class="fu">done</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>                NewsResponse response <span class="op">=</span> <span class="fu">get</span><span class="op">();</span></span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>                <span class="co">// Update GUI with news articles (runs on EDT)</span></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>                <span class="fu">updateArticlesTable</span><span class="op">(</span>response<span class="op">.</span><span class="fu">getArticles</span><span class="op">());</span></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>                <span class="fu">updateStatusBar</span><span class="op">(</span><span class="st">&quot;Found &quot;</span> <span class="op">+</span> response<span class="op">.</span><span class="fu">getArticles</span><span class="op">().</span><span class="fu">size</span><span class="op">()</span> <span class="op">+</span> <span class="st">&quot; articles&quot;</span><span class="op">);</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">Exception</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>                logger<span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;Error fetching news&quot;</span><span class="op">,</span> e<span class="op">);</span></span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>                <span class="fu">showErrorMessage</span><span class="op">(</span><span class="st">&quot;Failed to fetch news: &quot;</span> <span class="op">+</span> e<span class="op">.</span><span class="fu">getMessage</span><span class="op">());</span></span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>    newsWorker<span class="op">.</span><span class="fu">execute</span><span class="op">();</span></span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 data-number="1.7.3" id="user-profile-window-integration"><span class="header-section-number">1.7.3</span> 5.3 User Profile Window
+Integration</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// UserProfileWindow.java - Display User Information and History</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> <span class="dt">void</span> <span class="fu">loadUserProfile</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    User currentUser <span class="op">=</span> SessionManager<span class="op">.</span><span class="fu">getInstance</span><span class="op">().</span><span class="fu">getCurrentUser</span><span class="op">();</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Display user information (loaded from session)</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    usernameLabel<span class="op">.</span><span class="fu">setText</span><span class="op">(</span>currentUser<span class="op">.</span><span class="fu">getUsername</span><span class="op">());</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    emailLabel<span class="op">.</span><span class="fu">setText</span><span class="op">(</span>currentUser<span class="op">.</span><span class="fu">getEmail</span><span class="op">());</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    fullNameLabel<span class="op">.</span><span class="fu">setText</span><span class="op">(</span>currentUser<span class="op">.</span><span class="fu">getFirstName</span><span class="op">()</span> <span class="op">+</span> <span class="st">&quot; &quot;</span> <span class="op">+</span> currentUser<span class="op">.</span><span class="fu">getLastName</span><span class="op">());</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    memberSinceLabel<span class="op">.</span><span class="fu">setText</span><span class="op">(</span>currentUser<span class="op">.</span><span class="fu">getCreatedAt</span><span class="op">().</span><span class="fu">format</span><span class="op">(</span>DateTimeFormatter<span class="op">.</span><span class="fu">ofPattern</span><span class="op">(</span><span class="st">&quot;MMM dd, yyyy&quot;</span><span class="op">)));</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>currentUser<span class="op">.</span><span class="fu">getLastLoginAt</span><span class="op">()</span> <span class="op">!=</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        lastLoginLabel<span class="op">.</span><span class="fu">setText</span><span class="op">(</span>currentUser<span class="op">.</span><span class="fu">getLastLoginAt</span><span class="op">().</span><span class="fu">format</span><span class="op">(</span>DateTimeFormatter<span class="op">.</span><span class="fu">ofPattern</span><span class="op">(</span><span class="st">&quot;MMM dd, yyyy HH:mm&quot;</span><span class="op">)));</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Load search history from database</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">loadSearchHistory</span><span class="op">();</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> <span class="dt">void</span> <span class="fu">loadSearchHistory</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    User currentUser <span class="op">=</span> SessionManager<span class="op">.</span><span class="fu">getInstance</span><span class="op">().</span><span class="fu">getCurrentUser</span><span class="op">();</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">SwingWorker</span><span class="op">&lt;</span><span class="bu">List</span><span class="op">&lt;</span>SearchHistory<span class="op">&gt;,</span> <span class="bu">Void</span><span class="op">&gt;</span> historyWorker <span class="op">=</span> <span class="kw">new</span> <span class="bu">SwingWorker</span><span class="op">&lt;</span><span class="bu">List</span><span class="op">&lt;</span>SearchHistory<span class="op">&gt;,</span> <span class="bu">Void</span><span class="op">&gt;()</span> <span class="op">{</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>        <span class="at">@Override</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>        <span class="kw">protected</span> <span class="bu">List</span><span class="op">&lt;</span>SearchHistory<span class="op">&gt;</span> <span class="fu">doInBackground</span><span class="op">()</span> <span class="kw">throws</span> <span class="bu">Exception</span> <span class="op">{</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Fetch user&#39;s search history from database (limit to 20 recent)</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> DatabaseService<span class="op">.</span><span class="fu">getInstance</span><span class="op">().</span><span class="fu">getUserSearchHistory</span><span class="op">(</span>currentUser<span class="op">.</span><span class="fu">getId</span><span class="op">(),</span> <span class="dv">20</span><span class="op">);</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>        <span class="at">@Override</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>        <span class="kw">protected</span> <span class="dt">void</span> <span class="fu">done</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>                <span class="bu">List</span><span class="op">&lt;</span>SearchHistory<span class="op">&gt;</span> history <span class="op">=</span> <span class="fu">get</span><span class="op">();</span></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>                <span class="co">// Update search history table</span></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>                <span class="fu">updateSearchHistoryTable</span><span class="op">(</span>history<span class="op">);</span></span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>                <span class="co">// Update statistics</span></span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>                <span class="dt">int</span> totalSearches <span class="op">=</span> DatabaseService<span class="op">.</span><span class="fu">getInstance</span><span class="op">().</span><span class="fu">getUserSearchCount</span><span class="op">(</span>currentUser<span class="op">.</span><span class="fu">getId</span><span class="op">());</span></span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>                searchCountLabel<span class="op">.</span><span class="fu">setText</span><span class="op">(</span><span class="bu">String</span><span class="op">.</span><span class="fu">valueOf</span><span class="op">(</span>totalSearches<span class="op">));</span></span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">Exception</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>                logger<span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;Error loading search history&quot;</span><span class="op">,</span> e<span class="op">);</span></span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>                <span class="fu">showErrorMessage</span><span class="op">(</span><span class="st">&quot;Failed to load search history&quot;</span><span class="op">);</span></span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>    historyWorker<span class="op">.</span><span class="fu">execute</span><span class="op">();</span></span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 data-number="1.8" id="complete-code-examples"><span class="header-section-number">1.8</span> 6. Complete Code Examples</h2>
+<h3 data-number="1.8.1" id="complete-user-registration-flow"><span class="header-section-number">1.8.1</span> 6.1 Complete User
+Registration Flow</h3>
+<div class="sourceCode" id="cb13"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Complete flow from GUI to Database</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Step 1: SignupWindow.java - User Input</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> <span class="dt">void</span> <span class="fu">handleSignup</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> username <span class="op">=</span> usernameField<span class="op">.</span><span class="fu">getText</span><span class="op">().</span><span class="fu">trim</span><span class="op">();</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> email <span class="op">=</span> emailField<span class="op">.</span><span class="fu">getText</span><span class="op">().</span><span class="fu">trim</span><span class="op">();</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> password <span class="op">=</span> <span class="kw">new</span> <span class="bu">String</span><span class="op">(</span>passwordField<span class="op">.</span><span class="fu">getPassword</span><span class="op">());</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> confirmPassword <span class="op">=</span> <span class="kw">new</span> <span class="bu">String</span><span class="op">(</span>confirmPasswordField<span class="op">.</span><span class="fu">getPassword</span><span class="op">());</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> firstName <span class="op">=</span> firstNameField<span class="op">.</span><span class="fu">getText</span><span class="op">().</span><span class="fu">trim</span><span class="op">();</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> lastName <span class="op">=</span> lastNameField<span class="op">.</span><span class="fu">getText</span><span class="op">().</span><span class="fu">trim</span><span class="op">();</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">SwingWorker</span><span class="op">&lt;</span>AuthenticationResult<span class="op">,</span> <span class="bu">Void</span><span class="op">&gt;</span> signupWorker <span class="op">=</span> <span class="kw">new</span> <span class="bu">SwingWorker</span><span class="op">&lt;</span>AuthenticationResult<span class="op">,</span> <span class="bu">Void</span><span class="op">&gt;()</span> <span class="op">{</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">@Override</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">protected</span> AuthenticationResult <span class="fu">doInBackground</span><span class="op">()</span> <span class="kw">throws</span> <span class="bu">Exception</span> <span class="op">{</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> authService<span class="op">.</span><span class="fu">register</span><span class="op">(</span>username<span class="op">,</span> email<span class="op">,</span> password<span class="op">,</span> confirmPassword<span class="op">,</span> firstName<span class="op">,</span> lastName<span class="op">);</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">@Override</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>        <span class="kw">protected</span> <span class="dt">void</span> <span class="fu">done</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>                AuthenticationResult result <span class="op">=</span> <span class="fu">get</span><span class="op">();</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="op">(</span>result<span class="op">.</span><span class="fu">isSuccess</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">JOptionPane</span><span class="op">.</span><span class="fu">showMessageDialog</span><span class="op">(</span>SignupWindow<span class="op">.</span><span class="fu">this</span><span class="op">,</span> </span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;Registration successful! Please login.&quot;</span><span class="op">,</span> </span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;Success&quot;</span><span class="op">,</span> <span class="bu">JOptionPane</span><span class="op">.</span><span class="fu">INFORMATION_MESSAGE</span><span class="op">);</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">dispose</span><span class="op">();</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">showError</span><span class="op">(</span>result<span class="op">.</span><span class="fu">getMessage</span><span class="op">());</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">Exception</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>                <span class="fu">showError</span><span class="op">(</span><span class="st">&quot;Registration failed: &quot;</span> <span class="op">+</span> e<span class="op">.</span><span class="fu">getMessage</span><span class="op">());</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>    signupWorker<span class="op">.</span><span class="fu">execute</span><span class="op">();</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a><span class="co">// Step 2: AuthenticationService.java - Business Logic</span></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> AuthenticationResult <span class="fu">register</span><span class="op">(</span><span class="bu">String</span> username<span class="op">,</span> <span class="bu">String</span> email<span class="op">,</span> <span class="bu">String</span> password<span class="op">,</span> </span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>                                   <span class="bu">String</span> confirmPassword<span class="op">,</span> <span class="bu">String</span> firstName<span class="op">,</span> <span class="bu">String</span> lastName<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Validate input</span></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>        ValidationResult validation <span class="op">=</span> <span class="fu">validateRegistration</span><span class="op">(</span>username<span class="op">,</span> email<span class="op">,</span> password<span class="op">,</span> confirmPassword<span class="op">);</span></span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(!</span>validation<span class="op">.</span><span class="fu">isValid</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span>validation<span class="op">.</span><span class="fu">getErrorMessage</span><span class="op">());</span></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Check if username already exists</span></span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>databaseService<span class="op">.</span><span class="fu">isUsernameExists</span><span class="op">(</span>username<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span><span class="st">&quot;Username already exists&quot;</span><span class="op">);</span></span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Check if email already exists</span></span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>databaseService<span class="op">.</span><span class="fu">isEmailExists</span><span class="op">(</span>email<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span><span class="st">&quot;Email already exists&quot;</span><span class="op">);</span></span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Hash password using BCrypt</span></span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> passwordHash <span class="op">=</span> BCrypt<span class="op">.</span><span class="fu">hashpw</span><span class="op">(</span>password<span class="op">,</span> BCrypt<span class="op">.</span><span class="fu">gensalt</span><span class="op">());</span></span>
+<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Create user object</span></span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a>        User user <span class="op">=</span> <span class="kw">new</span> <span class="fu">User</span><span class="op">(</span>username<span class="op">,</span> email<span class="op">,</span> passwordHash<span class="op">,</span> firstName<span class="op">,</span> lastName<span class="op">);</span></span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a>        user<span class="op">.</span><span class="fu">setCreatedAt</span><span class="op">(</span>LocalDateTime<span class="op">.</span><span class="fu">now</span><span class="op">());</span></span>
+<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>        user<span class="op">.</span><span class="fu">setActive</span><span class="op">(</span><span class="kw">true</span><span class="op">);</span></span>
+<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Save to database</span></span>
+<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a>        user <span class="op">=</span> databaseService<span class="op">.</span><span class="fu">createUser</span><span class="op">(</span>user<span class="op">);</span></span>
+<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a>        logger<span class="op">.</span><span class="fu">info</span><span class="op">(</span><span class="st">&quot;User registered successfully: {}&quot;</span><span class="op">,</span> username<span class="op">);</span></span>
+<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">success</span><span class="op">(</span>user<span class="op">,</span> <span class="st">&quot;Registration successful&quot;</span><span class="op">);</span></span>
+<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">SQLException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a>        logger<span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;Database error during registration&quot;</span><span class="op">,</span> e<span class="op">);</span></span>
+<span id="cb13-75"><a href="#cb13-75" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span><span class="st">&quot;Registration failed due to database error&quot;</span><span class="op">);</span></span>
+<span id="cb13-76"><a href="#cb13-76" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-77"><a href="#cb13-77" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-78"><a href="#cb13-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-79"><a href="#cb13-79" aria-hidden="true" tabindex="-1"></a><span class="co">// Step 3: DatabaseService.java - Data Persistence</span></span>
+<span id="cb13-80"><a href="#cb13-80" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> User <span class="fu">createUser</span><span class="op">(</span>User user<span class="op">)</span> <span class="kw">throws</span> <span class="bu">SQLException</span> <span class="op">{</span></span>
+<span id="cb13-81"><a href="#cb13-81" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> sql <span class="op">=</span> <span class="st">&quot;INSERT INTO users (username, email, password_hash, first_name, last_name, created_at) VALUES (?, ?, ?, ?, ?, ?)&quot;</span><span class="op">;</span></span>
+<span id="cb13-82"><a href="#cb13-82" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-83"><a href="#cb13-83" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">(</span><span class="bu">Connection</span> conn <span class="op">=</span> dataSource<span class="op">.</span><span class="fu">getConnection</span><span class="op">();</span></span>
+<span id="cb13-84"><a href="#cb13-84" aria-hidden="true" tabindex="-1"></a>         <span class="bu">PreparedStatement</span> stmt <span class="op">=</span> conn<span class="op">.</span><span class="fu">prepareStatement</span><span class="op">(</span>sql<span class="op">,</span> <span class="bu">Statement</span><span class="op">.</span><span class="fu">RETURN_GENERATED_KEYS</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb13-85"><a href="#cb13-85" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-86"><a href="#cb13-86" aria-hidden="true" tabindex="-1"></a>        stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> user<span class="op">.</span><span class="fu">getUsername</span><span class="op">());</span></span>
+<span id="cb13-87"><a href="#cb13-87" aria-hidden="true" tabindex="-1"></a>        stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">2</span><span class="op">,</span> user<span class="op">.</span><span class="fu">getEmail</span><span class="op">());</span></span>
+<span id="cb13-88"><a href="#cb13-88" aria-hidden="true" tabindex="-1"></a>        stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">3</span><span class="op">,</span> user<span class="op">.</span><span class="fu">getPasswordHash</span><span class="op">());</span></span>
+<span id="cb13-89"><a href="#cb13-89" aria-hidden="true" tabindex="-1"></a>        stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">4</span><span class="op">,</span> user<span class="op">.</span><span class="fu">getFirstName</span><span class="op">());</span></span>
+<span id="cb13-90"><a href="#cb13-90" aria-hidden="true" tabindex="-1"></a>        stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">5</span><span class="op">,</span> user<span class="op">.</span><span class="fu">getLastName</span><span class="op">());</span></span>
+<span id="cb13-91"><a href="#cb13-91" aria-hidden="true" tabindex="-1"></a>        stmt<span class="op">.</span><span class="fu">setTimestamp</span><span class="op">(</span><span class="dv">6</span><span class="op">,</span> <span class="bu">Timestamp</span><span class="op">.</span><span class="fu">valueOf</span><span class="op">(</span>user<span class="op">.</span><span class="fu">getCreatedAt</span><span class="op">()));</span></span>
+<span id="cb13-92"><a href="#cb13-92" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-93"><a href="#cb13-93" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> rowsAffected <span class="op">=</span> stmt<span class="op">.</span><span class="fu">executeUpdate</span><span class="op">();</span></span>
+<span id="cb13-94"><a href="#cb13-94" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>rowsAffected <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-95"><a href="#cb13-95" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span> <span class="op">(</span><span class="bu">ResultSet</span> rs <span class="op">=</span> stmt<span class="op">.</span><span class="fu">getGeneratedKeys</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb13-96"><a href="#cb13-96" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="op">(</span>rs<span class="op">.</span><span class="fu">next</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb13-97"><a href="#cb13-97" aria-hidden="true" tabindex="-1"></a>                    user<span class="op">.</span><span class="fu">setId</span><span class="op">(</span>rs<span class="op">.</span><span class="fu">getLong</span><span class="op">(</span><span class="dv">1</span><span class="op">));</span></span>
+<span id="cb13-98"><a href="#cb13-98" aria-hidden="true" tabindex="-1"></a>                    logger<span class="op">.</span><span class="fu">info</span><span class="op">(</span><span class="st">&quot;User created in database with ID: {}&quot;</span><span class="op">,</span> user<span class="op">.</span><span class="fu">getId</span><span class="op">());</span></span>
+<span id="cb13-99"><a href="#cb13-99" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">return</span> user<span class="op">;</span></span>
+<span id="cb13-100"><a href="#cb13-100" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb13-101"><a href="#cb13-101" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb13-102"><a href="#cb13-102" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb13-103"><a href="#cb13-103" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-104"><a href="#cb13-104" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">SQLException</span><span class="op">(</span><span class="st">&quot;Failed to create user&quot;</span><span class="op">);</span></span>
+<span id="cb13-105"><a href="#cb13-105" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-106"><a href="#cb13-106" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 data-number="1.8.2" id="connection-pool-management-example"><span class="header-section-number">1.8.2</span> 6.2 Connection Pool
+Management Example</h3>
+<div class="sourceCode" id="cb14"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">// DatabaseService.java - Connection Pool Lifecycle</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> DatabaseService <span class="op">{</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Connection pool monitoring</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">logConnectionPoolStats</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>dataSource <span class="kw">instanceof</span> HikariDataSource<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>            HikariDataSource hikariDS <span class="op">=</span> <span class="op">(</span>HikariDataSource<span class="op">)</span> dataSource<span class="op">;</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>            HikariPoolMXBean poolBean <span class="op">=</span> hikariDS<span class="op">.</span><span class="fu">getHikariPoolMXBean</span><span class="op">();</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>            logger<span class="op">.</span><span class="fu">info</span><span class="op">(</span><span class="st">&quot;Connection Pool Statistics:&quot;</span><span class="op">);</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>            logger<span class="op">.</span><span class="fu">info</span><span class="op">(</span><span class="st">&quot;Active connections: {}&quot;</span><span class="op">,</span> poolBean<span class="op">.</span><span class="fu">getActiveConnections</span><span class="op">());</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>            logger<span class="op">.</span><span class="fu">info</span><span class="op">(</span><span class="st">&quot;Total connections: {}&quot;</span><span class="op">,</span> poolBean<span class="op">.</span><span class="fu">getTotalConnections</span><span class="op">());</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>            logger<span class="op">.</span><span class="fu">info</span><span class="op">(</span><span class="st">&quot;Idle connections: {}&quot;</span><span class="op">,</span> poolBean<span class="op">.</span><span class="fu">getIdleConnections</span><span class="op">());</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>            logger<span class="op">.</span><span class="fu">info</span><span class="op">(</span><span class="st">&quot;Waiting for connection: {}&quot;</span><span class="op">,</span> poolBean<span class="op">.</span><span class="fu">getThreadsAwaitingConnection</span><span class="op">());</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Proper connection usage pattern</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">boolean</span> <span class="fu">updateLastLogin</span><span class="op">(</span><span class="bu">Long</span> userId<span class="op">)</span> <span class="kw">throws</span> <span class="bu">SQLException</span> <span class="op">{</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> sql <span class="op">=</span> <span class="st">&quot;UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?&quot;</span><span class="op">;</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Connection automatically returned to pool after try block</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">(</span><span class="bu">Connection</span> conn <span class="op">=</span> dataSource<span class="op">.</span><span class="fu">getConnection</span><span class="op">();</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>             <span class="bu">PreparedStatement</span> stmt <span class="op">=</span> conn<span class="op">.</span><span class="fu">prepareStatement</span><span class="op">(</span>sql<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>            stmt<span class="op">.</span><span class="fu">setLong</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> userId<span class="op">);</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>            <span class="dt">int</span> rowsUpdated <span class="op">=</span> stmt<span class="op">.</span><span class="fu">executeUpdate</span><span class="op">();</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>            logger<span class="op">.</span><span class="fu">debug</span><span class="op">(</span><span class="st">&quot;Updated last login for user ID: {}&quot;</span><span class="op">,</span> userId<span class="op">);</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> rowsUpdated <span class="op">&gt;</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Connection automatically closed and returned to pool here</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Application shutdown - close connection pool</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">close</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>dataSource <span class="kw">instanceof</span> HikariDataSource<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>            <span class="op">((</span>HikariDataSource<span class="op">)</span> dataSource<span class="op">).</span><span class="fu">close</span><span class="op">();</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>            logger<span class="op">.</span><span class="fu">info</span><span class="op">(</span><span class="st">&quot;Database connection pool closed&quot;</span><span class="op">);</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 data-number="1.9" id="data-flow-diagrams"><span class="header-section-number">1.9</span> 7. Data Flow Diagrams</h2>
+<h3 data-number="1.9.1" id="user-authentication-data-flow"><span class="header-section-number">1.9.1</span> 7.1 User Authentication Data
+Flow</h3>
+<pre><code>┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   LoginWindow   │    │ AuthenticationSvc │    │ DatabaseService │
+│   (Frontend)    │    │   (Backend)      │    │ (Data Layer)    │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+         │                        │                        │
+         │ 1. login(user, pass)   │                        │
+         ├────────────────────────&gt;│                        │
+         │                        │ 2. findUserByUsername()│
+         │                        ├────────────────────────&gt;│
+         │                        │                        │
+         │                        │                        │ 3. getConnection()
+         │                        │                        ├─────────────┐
+         │                        │                        │  ┌─────────▼───────┐
+         │                        │                        │  │   HikariCP     │
+         │                        │                        │  │ Connection Pool│
+         │                        │                        │  └─────────────────┘
+         │                        │                        │ 4. SELECT * FROM users
+         │                        │                        ├─────────────┐
+         │                        │                        │  ┌─────────▼───────┐
+         │                        │                        │  │  H2 Database   │
+         │                        │                        │  │ (File System)  │
+         │                        │                        │  └─────────────────┘
+         │                        │ 5. User object         │
+         │                        │&lt;────────────────────────┤
+         │                        │ 6. BCrypt.checkpw()    │
+         │                        ├─────────────┐          │
+         │                        │             │          │
+         │                        │&lt;────────────┘          │
+         │ 7. AuthenticationResult│                        │
+         │&lt;────────────────────────┤                        │
+         │ 8. SessionManager.     │                        │
+         │    startSession()      │                        │
+         ├─────────────┐          │                        │
+         │             │          │                        │
+         │&lt;────────────┘          │                        │
+         │ 9. MainWindow()        │                        │
+         ├─────────────┐          │                        │
+         │             │          │                        │
+         │&lt;────────────┘          │                        │</code></pre>
+<h3 data-number="1.9.2" id="news-search-data-flow"><span class="header-section-number">1.9.2</span> 7.2 News Search Data
+Flow</h3>
+<pre><code>┌──────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌────────────┐
+│ MainWindow   │  │ NewsApiSvc  │  │DatabaseSvc  │  │ HikariCP    │  │ H2Database │
+│ (Frontend)   │  │ (Backend)   │  │(Data Layer) │  │(Conn Pool)  │  │(Storage)   │
+└──────────────┘  └─────────────┘  └─────────────┘  └─────────────┘  └────────────┘
+       │                 │               │               │               │
+       │ 1. fetchNews()  │               │               │               │
+       ├─────────────────&gt;│               │               │               │
+       │                 │ 2. External   │               │               │
+       │                 │    API Call   │               │               │
+       │                 ├───────────────┐               │               │
+       │                 │               │               │               │
+       │                 │&lt;──────────────┘               │               │
+       │                 │ 3. saveSearchHistory()        │               │
+       │                 ├─────────────────────────────&gt;│               │
+       │                 │               │ 4. getConnection()            │
+       │                 │               ├─────────────&gt;│               │
+       │                 │               │ 5. Connection │               │
+       │                 │               │&lt;──────────────┤               │
+       │                 │               │ 6. INSERT INTO search_history │
+       │                 │               ├─────────────────────────────&gt;│
+       │                 │               │ 7. Rows affected              │
+       │                 │               │&lt;──────────────────────────────┤
+       │                 │ 8. Success    │ 8. returnConnection()         │
+       │                 │&lt;──────────────────────────────┤─────────────&gt;│
+       │ 9. NewsResponse │               │               │               │
+       │&lt;─────────────────┤               │               │               │
+       │ 10. updateUI()  │               │               │               │
+       ├──────────┐      │               │               │               │
+       │          │      │               │               │               │
+       │&lt;─────────┘      │               │               │               │</code></pre>
+<hr />
+<h2 data-number="1.10" id="security-implementation"><span class="header-section-number">1.10</span> 8. Security
+Implementation</h2>
+<h3 data-number="1.10.1" id="password-security"><span class="header-section-number">1.10.1</span> 8.1 Password Security</h3>
+<div class="sourceCode" id="cb17"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">// AuthenticationService.java - Secure password handling</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> AuthenticationService <span class="op">{</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Password hashing during registration</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> AuthenticationResult <span class="fu">register</span><span class="op">(</span><span class="bu">String</span> username<span class="op">,</span> <span class="bu">String</span> email<span class="op">,</span> <span class="bu">String</span> password<span class="op">,</span> </span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>                                       <span class="bu">String</span> confirmPassword<span class="op">,</span> <span class="bu">String</span> firstName<span class="op">,</span> <span class="bu">String</span> lastName<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">// ... validation code ...</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Generate salt and hash password (BCrypt automatically handles salt)</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">String</span> passwordHash <span class="op">=</span> BCrypt<span class="op">.</span><span class="fu">hashpw</span><span class="op">(</span>password<span class="op">,</span> BCrypt<span class="op">.</span><span class="fu">gensalt</span><span class="op">());</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Create user with hashed password (never store plain text)</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>        User user <span class="op">=</span> <span class="kw">new</span> <span class="fu">User</span><span class="op">(</span>username<span class="op">,</span> email<span class="op">,</span> passwordHash<span class="op">,</span> firstName<span class="op">,</span> lastName<span class="op">);</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// ... save to database ...</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Password verification during login</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> AuthenticationResult <span class="fu">login</span><span class="op">(</span><span class="bu">String</span> username<span class="op">,</span> <span class="bu">String</span> password<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">// ... find user in database ...</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Verify password against stored hash</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(!</span>BCrypt<span class="op">.</span><span class="fu">checkpw</span><span class="op">(</span>password<span class="op">,</span> user<span class="op">.</span><span class="fu">getPasswordHash</span><span class="op">()))</span> <span class="op">{</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span><span class="st">&quot;Invalid username or password&quot;</span><span class="op">);</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Password is correct, proceed with login</span></span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">// ... update last login ...</span></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 data-number="1.10.2" id="sql-injection-prevention"><span class="header-section-number">1.10.2</span> 8.2 SQL Injection
+Prevention</h3>
+<div class="sourceCode" id="cb18"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">// DatabaseService.java - Safe database queries</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> User <span class="fu">findUserByUsername</span><span class="op">(</span><span class="bu">String</span> username<span class="op">)</span> <span class="kw">throws</span> <span class="bu">SQLException</span> <span class="op">{</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// SECURE: Using PreparedStatement with parameter binding</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> sql <span class="op">=</span> <span class="st">&quot;SELECT * FROM users WHERE username = ? AND is_active = TRUE&quot;</span><span class="op">;</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">(</span><span class="bu">Connection</span> conn <span class="op">=</span> dataSource<span class="op">.</span><span class="fu">getConnection</span><span class="op">();</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>         <span class="bu">PreparedStatement</span> stmt <span class="op">=</span> conn<span class="op">.</span><span class="fu">prepareStatement</span><span class="op">(</span>sql<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Parameter binding prevents SQL injection</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>        stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> username<span class="op">);</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">(</span><span class="bu">ResultSet</span> rs <span class="op">=</span> stmt<span class="op">.</span><span class="fu">executeQuery</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">(</span>rs<span class="op">.</span><span class="fu">next</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="fu">mapResultSetToUser</span><span class="op">(</span>rs<span class="op">);</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">null</span><span class="op">;</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="co">// INSECURE EXAMPLE (DON&#39;T DO THIS):</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="co">// String sql = &quot;SELECT * FROM users WHERE username = &#39;&quot; + username + &quot;&#39;&quot;;</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="co">// This would be vulnerable to SQL injection attacks</span></span></code></pre></div>
+<h3 data-number="1.10.3" id="resource-management-and-cleanup"><span class="header-section-number">1.10.3</span> 8.3 Resource Management and
+Cleanup</h3>
+<div class="sourceCode" id="cb19"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">// DatabaseService.java - Proper resource management</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="bu">List</span><span class="op">&lt;</span>SearchHistory<span class="op">&gt;</span> <span class="fu">getUserSearchHistory</span><span class="op">(</span><span class="bu">Long</span> userId<span class="op">,</span> <span class="dt">int</span> limit<span class="op">)</span> <span class="kw">throws</span> <span class="bu">SQLException</span> <span class="op">{</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> sql <span class="op">=</span> <span class="st">&quot;SELECT * FROM search_history WHERE user_id = ? ORDER BY searched_at DESC&quot;</span> <span class="op">+</span> </span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                <span class="op">(</span>limit <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">?</span> <span class="st">&quot; LIMIT ?&quot;</span> <span class="op">:</span> <span class="st">&quot;&quot;</span><span class="op">);</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">List</span><span class="op">&lt;</span>SearchHistory<span class="op">&gt;</span> history <span class="op">=</span> <span class="kw">new</span> <span class="bu">ArrayList</span><span class="op">&lt;&gt;();</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Try-with-resources ensures automatic resource cleanup</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">(</span><span class="bu">Connection</span> conn <span class="op">=</span> dataSource<span class="op">.</span><span class="fu">getConnection</span><span class="op">();</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>         <span class="bu">PreparedStatement</span> stmt <span class="op">=</span> conn<span class="op">.</span><span class="fu">prepareStatement</span><span class="op">(</span>sql<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>        stmt<span class="op">.</span><span class="fu">setLong</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> userId<span class="op">);</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>limit <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>            stmt<span class="op">.</span><span class="fu">setInt</span><span class="op">(</span><span class="dv">2</span><span class="op">,</span> limit<span class="op">);</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> <span class="op">(</span><span class="bu">ResultSet</span> rs <span class="op">=</span> stmt<span class="op">.</span><span class="fu">executeQuery</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>            <span class="cf">while</span> <span class="op">(</span>rs<span class="op">.</span><span class="fu">next</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>                history<span class="op">.</span><span class="fu">add</span><span class="op">(</span><span class="fu">mapResultSetToSearchHistory</span><span class="op">(</span>rs<span class="op">));</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// ResultSet automatically closed here</span></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Connection and PreparedStatement automatically closed here</span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> history<span class="op">;</span></span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 data-number="1.11" id="error-handling-and-logging"><span class="header-section-number">1.11</span> 9. Error Handling and
+Logging</h2>
+<h3 data-number="1.11.1" id="comprehensive-error-handling"><span class="header-section-number">1.11.1</span> 9.1 Comprehensive Error
+Handling</h3>
+<div class="sourceCode" id="cb20"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">// AuthenticationService.java - Robust error handling</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> AuthenticationResult <span class="fu">login</span><span class="op">(</span><span class="bu">String</span> username<span class="op">,</span> <span class="bu">String</span> password<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Validate input parameters</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>username <span class="op">==</span> <span class="kw">null</span> <span class="op">||</span> username<span class="op">.</span><span class="fu">trim</span><span class="op">().</span><span class="fu">isEmpty</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span><span class="st">&quot;Username is required&quot;</span><span class="op">);</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>password <span class="op">==</span> <span class="kw">null</span> <span class="op">||</span> password<span class="op">.</span><span class="fu">isEmpty</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span><span class="st">&quot;Password is required&quot;</span><span class="op">);</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Attempt database operations</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>        User user <span class="op">=</span> databaseService<span class="op">.</span><span class="fu">findUserByUsername</span><span class="op">(</span>username<span class="op">.</span><span class="fu">trim</span><span class="op">());</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>user <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Log security event but don&#39;t reveal specifics to user</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>            logger<span class="op">.</span><span class="fu">warn</span><span class="op">(</span><span class="st">&quot;Login attempt for non-existent user: {}&quot;</span><span class="op">,</span> username<span class="op">);</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span><span class="st">&quot;Invalid username or password&quot;</span><span class="op">);</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Verify password</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(!</span>BCrypt<span class="op">.</span><span class="fu">checkpw</span><span class="op">(</span>password<span class="op">,</span> user<span class="op">.</span><span class="fu">getPasswordHash</span><span class="op">()))</span> <span class="op">{</span></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>            logger<span class="op">.</span><span class="fu">warn</span><span class="op">(</span><span class="st">&quot;Invalid password attempt for user: {}&quot;</span><span class="op">,</span> username<span class="op">);</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span><span class="st">&quot;Invalid username or password&quot;</span><span class="op">);</span></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Update last login</span></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>        databaseService<span class="op">.</span><span class="fu">updateLastLogin</span><span class="op">(</span>user<span class="op">.</span><span class="fu">getId</span><span class="op">());</span></span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>        user<span class="op">.</span><span class="fu">setLastLoginAt</span><span class="op">(</span>LocalDateTime<span class="op">.</span><span class="fu">now</span><span class="op">());</span></span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>        logger<span class="op">.</span><span class="fu">info</span><span class="op">(</span><span class="st">&quot;Successful login for user: {}&quot;</span><span class="op">,</span> username<span class="op">);</span></span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">success</span><span class="op">(</span>user<span class="op">,</span> <span class="st">&quot;Login successful&quot;</span><span class="op">);</span></span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">SQLException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Log technical details but provide user-friendly message</span></span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>        logger<span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;Database error during login for user: {}&quot;</span><span class="op">,</span> username<span class="op">,</span> e<span class="op">);</span></span>
+<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span><span class="st">&quot;Login failed due to system error. Please try again.&quot;</span><span class="op">);</span></span>
+<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">Exception</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Catch any unexpected errors</span></span>
+<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a>        logger<span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;Unexpected error during login for user: {}&quot;</span><span class="op">,</span> username<span class="op">,</span> e<span class="op">);</span></span>
+<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> AuthenticationResult<span class="op">.</span><span class="fu">failure</span><span class="op">(</span><span class="st">&quot;An unexpected error occurred. Please try again.&quot;</span><span class="op">);</span></span>
+<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 data-number="1.11.2" id="frontend-error-handling"><span class="header-section-number">1.11.2</span> 9.2 Frontend Error
+Handling</h3>
+<div class="sourceCode" id="cb21"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">// LoginWindow.java - GUI error handling</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> <span class="dt">void</span> <span class="fu">handleLogin</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> username <span class="op">=</span> loginUsernameField<span class="op">.</span><span class="fu">getText</span><span class="op">();</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> password <span class="op">=</span> <span class="kw">new</span> <span class="bu">String</span><span class="op">(</span>loginPasswordField<span class="op">.</span><span class="fu">getPassword</span><span class="op">());</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">showLoadingState</span><span class="op">(</span><span class="kw">true</span><span class="op">);</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">SwingWorker</span><span class="op">&lt;</span>AuthenticationResult<span class="op">,</span> <span class="bu">Void</span><span class="op">&gt;</span> loginWorker <span class="op">=</span> <span class="kw">new</span> <span class="bu">SwingWorker</span><span class="op">&lt;</span>AuthenticationResult<span class="op">,</span> <span class="bu">Void</span><span class="op">&gt;()</span> <span class="op">{</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">@Override</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">protected</span> AuthenticationResult <span class="fu">doInBackground</span><span class="op">()</span> <span class="kw">throws</span> <span class="bu">Exception</span> <span class="op">{</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> authService<span class="op">.</span><span class="fu">login</span><span class="op">(</span>username<span class="op">,</span> password<span class="op">);</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">@Override</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>        <span class="kw">protected</span> <span class="dt">void</span> <span class="fu">done</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>                AuthenticationResult result <span class="op">=</span> <span class="fu">get</span><span class="op">();</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>                <span class="fu">showLoadingState</span><span class="op">(</span><span class="kw">false</span><span class="op">);</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="op">(</span>result<span class="op">.</span><span class="fu">isSuccess</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// Success path</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>                    SessionManager<span class="op">.</span><span class="fu">getInstance</span><span class="op">().</span><span class="fu">startSession</span><span class="op">(</span>result<span class="op">.</span><span class="fu">getUser</span><span class="op">());</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">showMessage</span><span class="op">(</span><span class="st">&quot;Welcome back, &quot;</span> <span class="op">+</span> result<span class="op">.</span><span class="fu">getUser</span><span class="op">().</span><span class="fu">getFirstName</span><span class="op">()</span> <span class="op">+</span> <span class="st">&quot;!&quot;</span><span class="op">,</span> <span class="kw">false</span><span class="op">);</span></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>                    </span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// Clear sensitive data</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">Arrays</span><span class="op">.</span><span class="fu">fill</span><span class="op">(</span>loginPasswordField<span class="op">.</span><span class="fu">getPassword</span><span class="op">(),</span> <span class="ch">&#39; &#39;</span><span class="op">);</span></span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>                    </span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// Navigate to main window</span></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">openMainWindow</span><span class="op">();</span></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>                    </span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// Failure path - show user-friendly error</span></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">showMessage</span><span class="op">(</span>result<span class="op">.</span><span class="fu">getMessage</span><span class="op">(),</span> <span class="kw">true</span><span class="op">);</span></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>                    </span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>                    <span class="co">// Clear password field for security</span></span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>                    loginPasswordField<span class="op">.</span><span class="fu">setText</span><span class="op">(</span><span class="st">&quot;&quot;</span><span class="op">);</span></span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>                    loginPasswordField<span class="op">.</span><span class="fu">requestFocus</span><span class="op">();</span></span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">InterruptedException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>                logger<span class="op">.</span><span class="fu">warn</span><span class="op">(</span><span class="st">&quot;Login operation was interrupted&quot;</span><span class="op">,</span> e<span class="op">);</span></span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>                <span class="fu">showMessage</span><span class="op">(</span><span class="st">&quot;Login was interrupted. Please try again.&quot;</span><span class="op">,</span> <span class="kw">true</span><span class="op">);</span></span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>                <span class="bu">Thread</span><span class="op">.</span><span class="fu">currentThread</span><span class="op">().</span><span class="fu">interrupt</span><span class="op">();</span></span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">ExecutionException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>                <span class="bu">Throwable</span> cause <span class="op">=</span> e<span class="op">.</span><span class="fu">getCause</span><span class="op">();</span></span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a>                logger<span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;Error during login execution&quot;</span><span class="op">,</span> cause<span class="op">);</span></span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a>                <span class="bu">String</span> userMessage <span class="op">=</span> <span class="st">&quot;Login failed. &quot;</span><span class="op">;</span></span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="op">(</span>cause <span class="kw">instanceof</span> <span class="bu">SQLException</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a>                    userMessage <span class="op">+=</span> <span class="st">&quot;Database connection error. Please try again later.&quot;</span><span class="op">;</span></span>
+<span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a>                    userMessage <span class="op">+=</span> <span class="st">&quot;Please check your connection and try again.&quot;</span><span class="op">;</span></span>
+<span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb21-57"><a href="#cb21-57" aria-hidden="true" tabindex="-1"></a>                <span class="fu">showMessage</span><span class="op">(</span>userMessage<span class="op">,</span> <span class="kw">true</span><span class="op">);</span></span>
+<span id="cb21-58"><a href="#cb21-58" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb21-59"><a href="#cb21-59" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">finally</span> <span class="op">{</span></span>
+<span id="cb21-60"><a href="#cb21-60" aria-hidden="true" tabindex="-1"></a>                <span class="fu">showLoadingState</span><span class="op">(</span><span class="kw">false</span><span class="op">);</span></span>
+<span id="cb21-61"><a href="#cb21-61" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb21-62"><a href="#cb21-62" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb21-63"><a href="#cb21-63" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb21-64"><a href="#cb21-64" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-65"><a href="#cb21-65" aria-hidden="true" tabindex="-1"></a>    loginWorker<span class="op">.</span><span class="fu">execute</span><span class="op">();</span></span>
+<span id="cb21-66"><a href="#cb21-66" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 data-number="1.12" id="performance-optimization-techniques"><span class="header-section-number">1.12</span> 10. Performance Optimization
+Techniques</h2>
+<h3 data-number="1.12.1" id="connection-pool-optimization"><span class="header-section-number">1.12.1</span> 10.1 Connection Pool
+Optimization</h3>
+<div class="sourceCode" id="cb22"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">// DatabaseService.java - Optimized connection pool settings</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> <span class="dt">void</span> <span class="fu">initializeDatabase</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    HikariConfig config <span class="op">=</span> <span class="kw">new</span> <span class="fu">HikariConfig</span><span class="op">();</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Connection settings</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="fu">setJdbcUrl</span><span class="op">(</span><span class="st">&quot;jdbc:h2:./data/newsvisualizer;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE&quot;</span><span class="op">);</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="fu">setUsername</span><span class="op">(</span><span class="st">&quot;sa&quot;</span><span class="op">);</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="fu">setPassword</span><span class="op">(</span><span class="st">&quot;&quot;</span><span class="op">);</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Pool sizing (adjust based on application load)</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="fu">setMaximumPoolSize</span><span class="op">(</span><span class="dv">10</span><span class="op">);</span>          <span class="co">// Max concurrent connections</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="fu">setMinimumIdle</span><span class="op">(</span><span class="dv">2</span><span class="op">);</span>               <span class="co">// Keep minimum connections ready</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Timeout settings</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="fu">setConnectionTimeout</span><span class="op">(</span><span class="dv">30000</span><span class="op">);</span>     <span class="co">// 30 seconds to get connection</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="fu">setIdleTimeout</span><span class="op">(</span><span class="dv">600000</span><span class="op">);</span>          <span class="co">// 10 minutes before idle connection removed</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="fu">setMaxLifetime</span><span class="op">(</span><span class="dv">1800000</span><span class="op">);</span>         <span class="co">// 30 minutes max connection age</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="fu">setLeakDetectionThreshold</span><span class="op">(</span><span class="dv">60000</span><span class="op">);</span> <span class="co">// 60 seconds to detect connection leaks</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Performance optimizations</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="fu">addDataSourceProperty</span><span class="op">(</span><span class="st">&quot;cachePrepStmts&quot;</span><span class="op">,</span> <span class="st">&quot;true&quot;</span><span class="op">);</span></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="fu">addDataSourceProperty</span><span class="op">(</span><span class="st">&quot;prepStmtCacheSize&quot;</span><span class="op">,</span> <span class="st">&quot;250&quot;</span><span class="op">);</span></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="fu">addDataSourceProperty</span><span class="op">(</span><span class="st">&quot;prepStmtCacheSqlLimit&quot;</span><span class="op">,</span> <span class="st">&quot;2048&quot;</span><span class="op">);</span></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="fu">addDataSourceProperty</span><span class="op">(</span><span class="st">&quot;useServerPrepStmts&quot;</span><span class="op">,</span> <span class="st">&quot;true&quot;</span><span class="op">);</span></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">this</span><span class="op">.</span><span class="fu">dataSource</span> <span class="op">=</span> <span class="kw">new</span> <span class="fu">HikariDataSource</span><span class="op">(</span>config<span class="op">);</span></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 data-number="1.12.2" id="batch-operations"><span class="header-section-number">1.12.2</span> 10.2 Batch Operations</h3>
+<div class="sourceCode" id="cb23"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">// DatabaseService.java - Efficient batch operations</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">void</span> <span class="fu">saveMultipleSearchHistory</span><span class="op">(</span><span class="bu">List</span><span class="op">&lt;</span>SearchHistory<span class="op">&gt;</span> historyList<span class="op">)</span> <span class="kw">throws</span> <span class="bu">SQLException</span> <span class="op">{</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> sql <span class="op">=</span> <span class="st">&quot;INSERT INTO search_history (user_id, search_type, search_query, country, category, articles_found, analysis_results, searched_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)&quot;</span><span class="op">;</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">(</span><span class="bu">Connection</span> conn <span class="op">=</span> dataSource<span class="op">.</span><span class="fu">getConnection</span><span class="op">();</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>         <span class="bu">PreparedStatement</span> stmt <span class="op">=</span> conn<span class="op">.</span><span class="fu">prepareStatement</span><span class="op">(</span>sql<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Disable auto-commit for batch operation</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>        conn<span class="op">.</span><span class="fu">setAutoCommit</span><span class="op">(</span><span class="kw">false</span><span class="op">);</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span>SearchHistory history <span class="op">:</span> historyList<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>            stmt<span class="op">.</span><span class="fu">setLong</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> history<span class="op">.</span><span class="fu">getUserId</span><span class="op">());</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>            stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">2</span><span class="op">,</span> history<span class="op">.</span><span class="fu">getSearchType</span><span class="op">());</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>            stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">3</span><span class="op">,</span> history<span class="op">.</span><span class="fu">getSearchQuery</span><span class="op">());</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>            stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">4</span><span class="op">,</span> history<span class="op">.</span><span class="fu">getCountry</span><span class="op">());</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>            stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">5</span><span class="op">,</span> history<span class="op">.</span><span class="fu">getCategory</span><span class="op">());</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>            stmt<span class="op">.</span><span class="fu">setInt</span><span class="op">(</span><span class="dv">6</span><span class="op">,</span> history<span class="op">.</span><span class="fu">getArticlesFound</span><span class="op">());</span></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>            stmt<span class="op">.</span><span class="fu">setString</span><span class="op">(</span><span class="dv">7</span><span class="op">,</span> history<span class="op">.</span><span class="fu">getAnalysisResults</span><span class="op">());</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>            stmt<span class="op">.</span><span class="fu">setTimestamp</span><span class="op">(</span><span class="dv">8</span><span class="op">,</span> <span class="bu">Timestamp</span><span class="op">.</span><span class="fu">valueOf</span><span class="op">(</span>history<span class="op">.</span><span class="fu">getSearchedAt</span><span class="op">()));</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>            stmt<span class="op">.</span><span class="fu">addBatch</span><span class="op">();</span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Execute all statements at once</span></span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span><span class="op">[]</span> results <span class="op">=</span> stmt<span class="op">.</span><span class="fu">executeBatch</span><span class="op">();</span></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>        conn<span class="op">.</span><span class="fu">commit</span><span class="op">();</span></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>        logger<span class="op">.</span><span class="fu">info</span><span class="op">(</span><span class="st">&quot;Batch saved {} search history records&quot;</span><span class="op">,</span> results<span class="op">.</span><span class="fu">length</span><span class="op">);</span></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">SQLException</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>        logger<span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;Error during batch insert&quot;</span><span class="op">,</span> e<span class="op">);</span></span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> e<span class="op">;</span></span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 data-number="1.13" id="conclusion"><span class="header-section-number">1.13</span> Conclusion</h2>
+<p>This comprehensive guide demonstrates how the NewsVisualizer
+application implements robust database connectivity using:</p>
+<ol type="1">
+<li><strong>JDBC with H2 Database</strong>: Lightweight, embedded
+database perfect for desktop applications</li>
+<li><strong>HikariCP Connection Pooling</strong>: High-performance
+connection management</li>
+<li><strong>Layered Architecture</strong>: Clear separation between GUI,
+business logic, and data access</li>
+<li><strong>Security Best Practices</strong>: BCrypt password hashing
+and SQL injection prevention</li>
+<li><strong>Proper Resource Management</strong>: Automatic cleanup and
+connection pooling</li>
+<li><strong>Comprehensive Error Handling</strong>: User-friendly errors
+with detailed logging</li>
+<li><strong>Performance Optimization</strong>: Connection pooling and
+prepared statement caching</li>
+</ol>
+<p>The integration flows seamlessly from frontend GUI components through
+backend services to the database layer, providing a solid foundation for
+user management and data persistence in the news visualization
+application.</p>
+</body>
+</html>
