@@ -1,3 +1,17 @@
+# Java / Maven
+target/
+*.class
+
+# Local database files
+data/*.db
+data/*.mv.db
+data/*.trace.db
+
+# Generated reports / scratch files
+Complete_Project_Report.html
+Database_JDBC_Integration_Guide.html
+temp.html
+
 # Dependencies
 node_modules/
 npm-debug.log*
@@ -7,7 +21,6 @@ yarn-error.log*
 # Production builds
 build/
 dist/
-target/
 *.min.js
 *.min.css
 
