@@ -15,12 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.newsvisualizer.model.SearchHistory;
-import com.newsvisualizer.model.User;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * Database service for handling user data and search history
+ * Database service for handling local application data and search history.
  */
 public class DatabaseService {
     private static final Logger logger = LoggerFactory.getLogger(DatabaseService.class);
@@ -67,22 +66,6 @@ public class DatabaseService {
     
     private void createTables() {
         try (Connection conn = dataSource.getConnection()) {
-            // Create users table
-            String createUsersTable = """
-                CREATE TABLE IF NOT EXISTS users (
-                    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-                    username VARCHAR(50) UNIQUE NOT NULL,
-                    email VARCHAR(100) UNIQUE NOT NULL,
-                    password_hash VARCHAR(255) NOT NULL,
-                    first_name VARCHAR(50),
-                    last_name VARCHAR(50),
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    last_login_at TIMESTAMP,
-                    is_active BOOLEAN DEFAULT TRUE
-                )
-            """;
-            
-            // Create search_history table
             String createSearchHistoryTable = """
                 CREATE TABLE IF NOT EXISTS search_history (
                     id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -93,13 +76,11 @@ public class DatabaseService {
                     category VARCHAR(50),
                     articles_found INTEGER DEFAULT 0,
                     analysis_results TEXT,
-                    searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                    searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """;
             
             try (Statement stmt = conn.createStatement()) {
-                stmt.execute(createUsersTable);
                 stmt.execute(createSearchHistoryTable);
                 logger.info("Database tables created successfully");
             }
@@ -108,118 +89,6 @@ public class DatabaseService {
             logger.error("Failed to create database tables", e);
             throw new RuntimeException("Table creation failed", e);
         }
-    }
-    
-    // User operations
-    public User createUser(User user) throws SQLException {
-        String sql = "INSERT INTO users (username, email, password_hash, first_name, last_name, created_at) VALUES (?, ?, ?, ?, ?, ?)";
-        
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
-            stmt.setString(1, user.getUsername());
-            stmt.setString(2, user.getEmail());
-            stmt.setString(3, user.getPasswordHash());
-            stmt.setString(4, user.getFirstName());
-            stmt.setString(5, user.getLastName());
-            stmt.setTimestamp(6, Timestamp.valueOf(user.getCreatedAt()));
-            
-            int rowsAffected = stmt.executeUpdate();
-            if (rowsAffected > 0) {
-                try (ResultSet rs = stmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        user.setId(rs.getLong(1));
-                        logger.info("User created successfully: {}", user.getUsername());
-                        return user;
-                    }
-                }
-            }
-            
-            throw new SQLException("Failed to create user");
-        }
-    }
-    
-    public User findUserByUsername(String username) throws SQLException {
-        String sql = "SELECT * FROM users WHERE username = ? AND is_active = TRUE";
-        
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, username);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToUser(rs);
-                }
-            }
-        }
-        
-        return null;
-    }
-    
-    public User findUserByEmail(String email) throws SQLException {
-        String sql = "SELECT * FROM users WHERE email = ? AND is_active = TRUE";
-        
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, email);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToUser(rs);
-                }
-            }
-        }
-        
-        return null;
-    }
-    
-    public boolean updateLastLogin(Long userId) throws SQLException {
-        String sql = "UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?";
-        
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setLong(1, userId);
-            return stmt.executeUpdate() > 0;
-        }
-    }
-    
-    public boolean isUsernameExists(String username) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM users WHERE username = ?";
-        
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, username);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0;
-                }
-            }
-        }
-        
-        return false;
-    }
-    
-    public boolean isEmailExists(String email) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
-        
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, email);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0;
-                }
-            }
-        }
-        
-        return false;
     }
     
     // Search History operations
@@ -306,31 +175,6 @@ public class DatabaseService {
             
             return stmt.executeUpdate() > 0;
         }
-    }
-    
-    // Helper methods
-    private User mapResultSetToUser(ResultSet rs) throws SQLException {
-        User user = new User();
-        user.setId(rs.getLong("id"));
-        user.setUsername(rs.getString("username"));
-        user.setEmail(rs.getString("email"));
-        user.setPasswordHash(rs.getString("password_hash"));
-        user.setFirstName(rs.getString("first_name"));
-        user.setLastName(rs.getString("last_name"));
-        
-        Timestamp createdAt = rs.getTimestamp("created_at");
-        if (createdAt != null) {
-            user.setCreatedAt(createdAt.toLocalDateTime());
-        }
-        
-        Timestamp lastLoginAt = rs.getTimestamp("last_login_at");
-        if (lastLoginAt != null) {
-            user.setLastLoginAt(lastLoginAt.toLocalDateTime());
-        }
-        
-        user.setActive(rs.getBoolean("is_active"));
-        
-        return user;
     }
     
     private SearchHistory mapResultSetToSearchHistory(ResultSet rs) throws SQLException {

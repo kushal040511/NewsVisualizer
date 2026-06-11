@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -160,6 +161,16 @@ public class TranslationService {
 
     public void clearCaches() {
         responseCache.clear();
+    }
+
+    public Map<String, String> getProviderDiagnostics() {
+        Map<String, String> diagnostics = new LinkedHashMap<>();
+        diagnostics.put("OpenAI", describeProviderStatus("OpenAI", OPENAI_API_KEY));
+        diagnostics.put("Gemini", describeProviderStatus("Gemini", GEMINI_API_KEY));
+        diagnostics.put("DeepL", describeProviderStatus("DeepL", DEEPL_API_KEY));
+        diagnostics.put("LibreTranslate", "Configured endpoint: " + LIBRETRANSLATE_API_URL);
+        diagnostics.put("Response cache", responseCache.size() + " cached items");
+        return diagnostics;
     }
 
     private LanguageTaskResponse runLanguageTask(String mode, String input, String sourceLanguage, String targetLanguage, String taskInstruction) {
@@ -1004,6 +1015,18 @@ public class TranslationService {
 
     private String buildFailureMessage(List<String> providerErrors) {
         return "Providers failed: " + String.join(" | ", providerErrors);
+    }
+
+    private String describeProviderStatus(String provider, String apiKey) {
+        if (isBlank(apiKey)) {
+            return "Not configured";
+        }
+        if (isProviderCoolingDown(provider)) {
+            Long until = providerCooldownUntil.get(provider);
+            long seconds = until == null ? 0 : Math.max(0, (until - System.currentTimeMillis()) / 1000);
+            return "Configured, temporarily cooling down after quota/provider error (" + seconds + "s remaining)";
+        }
+        return "Configured";
     }
 
     private static boolean isQuotaError(String message) {

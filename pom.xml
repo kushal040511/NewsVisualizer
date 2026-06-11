@@ -34,20 +34,6 @@
             <version>2.15.2</version>
         </dependency>
         
-        <!-- JFreeChart for data visualization -->
-        <dependency>
-            <groupId>org.jfree</groupId>
-            <artifactId>jfreechart</artifactId>
-            <version>1.5.3</version>
-        </dependency>
-        
-        <!-- OpenCSV for CSV export -->
-        <dependency>
-            <groupId>com.opencsv</groupId>
-            <artifactId>opencsv</artifactId>
-            <version>5.8</version>
-        </dependency>
-        
         <!-- Apache Commons Lang for utilities -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -68,7 +54,7 @@
             <version>1.4.11</version>
         </dependency>
         
-        <!-- H2 Database for user data -->
+        <!-- H2 Database for local application data -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -80,13 +66,6 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>5.0.1</version>
-        </dependency>
-        
-        <!-- BCrypt for password hashing -->
-        <dependency>
-            <groupId>org.mindrot</groupId>
-            <artifactId>jbcrypt</artifactId>
-            <version>0.4</version>
         </dependency>
         
         <!-- Jackson for JSON serialization -->

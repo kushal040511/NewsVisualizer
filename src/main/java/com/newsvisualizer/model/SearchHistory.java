@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class SearchHistory {
     private Long id;
     private Long userId;
-    private String searchType; // "headlines", "keywords", "url_summary", "translation"
+    private String searchType; // "headlines", "url_summary", "translation", "briefing"
     private String searchQuery;
     private String country;
     private String category;
@@ -126,12 +126,12 @@ public class SearchHistory {
                     title.append(" - ").append(category.substring(0, 1).toUpperCase()).append(category.substring(1));
                 }
                 return title.toString();
-            case "keywords":
-                return "Search: \"" + (searchQuery != null ? searchQuery : "General") + "\"";
             case "url_summary":
                 return "Article Summary";
             case "translation":
                 return "Translation Helper";
+            case "briefing":
+                return "Newsroom Briefing";
             default:
                 return "Unknown Search";
         }
@@ -140,12 +140,13 @@ public class SearchHistory {
     public String getSearchDescription() {
         switch (searchType) {
             case "headlines":
-            case "keywords":
                 return articlesFound + " articles found";
             case "url_summary":
                 return "Article summarized";
             case "translation":
                 return "Language result generated";
+            case "briefing":
+                return "Feed briefing generated";
             default:
                 return "";
         }
