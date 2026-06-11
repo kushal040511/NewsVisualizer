@@ -1,195 +1,117 @@
-# News Visualizer
+# NewsVisualizer
 
-A Java application for fetching, analyzing, and visualizing news data with interactive charts and sentiment analysis.
+**🌐 Live: [newsvisualizer.vercel.app](https://newsvisualizer.vercel.app)**
 
-## Features
+A news intelligence platform that fetches, analyzes, and visualizes news data — narrative clusters, breaking signals, sentiment, source balance, and AI summaries, rendered as one instrument.
 
-- **News Fetching**: Retrieve news articles from external APIs (NewsAPI.org)
-- **Sentiment Analysis**: Analyze the emotional tone of news articles
-- **Data Visualization**: Interactive charts and graphs showing:
-  - Sentiment distribution
-  - Source distribution
-  - Keyword frequency
-  - Publication timeline
-- **Search & Filter**: Search by keywords, country, or category
-- **Modern GUI**: Clean Swing-based interface with tabbed layout
+The project ships in two forms:
 
-## Prerequisites
+| | Stack | Where |
+|---|---|---|
+| **Web platform** (primary) | Next.js 16 · React Three Fiber · Tailwind · Python API | [`web/`](web/) — deployed on Vercel |
+| **Desktop app** (legacy) | Java 11 · Swing · JFreeChart · Maven | [`src/`](src/) |
+
+---
+
+## Web Platform
+
+A futuristic dark-mode web app: a cinematic landing page with an interactive 3D signal globe, and a 14-module newsroom console.
+
+### Modules
+
+Dashboard · News Fetch · Analytics · Story Radar · Source Monitor · Breaking Watch · Duplicate Stories · Source Balance · Story Timeline · AI Summary · Translation · NewsApp Reader · Search History · Settings
+
+### Architecture
+
+```
+web/
+├── client/        # Next.js 16 frontend (App Router, Tailwind v4,
+│                  #   Framer Motion, React Three Fiber, React Query, Zustand)
+├── server/        # Python stdlib API server (SQLite, no dependencies)
+├── api-service/   # Vercel wrapper that deploys server.py as a Python function
+└── start.sh       # Local dev: starts backend (8081) + frontend (3000)
+```
+
+- In **development**, the frontend proxies `/api/*` to the local Python server on port 8081.
+- In **production**, the frontend ([newsvisualizer.vercel.app](https://newsvisualizer.vercel.app)) rewrites `/api/*` to the deployed Python API ([newsvisualizer-api.vercel.app](https://newsvisualizer-api.vercel.app)).
+- The database lives in `/tmp` (SQLite). On the serverless deployment it is ephemeral — click **Fetch News** to repopulate the feed.
+
+### Run locally
+
+Requirements: Node.js 18+, Python 3.
+
+```bash
+cd web
+./start.sh
+# Frontend: http://localhost:3000
+# API:      http://localhost:8081
+```
+
+Or run the pieces separately:
+
+```bash
+cd web/server && PORT=8081 python3 server.py   # backend
+cd web/client && npm install && npm run dev    # frontend
+```
+
+### Deploy
+
+Both projects deploy to Vercel with the CLI:
+
+```bash
+cd web/client      && vercel deploy --prod   # frontend
+cd web/api-service && vercel deploy --prod   # Python API
+```
+
+---
+
+## Desktop App (Java)
+
+The original Swing desktop application with interactive charts and sentiment analysis.
+
+### Features
+
+- News fetching from external APIs (NewsAPI.org)
+- Sentiment analysis of article tone
+- Interactive charts: sentiment distribution, source distribution, keyword frequency, publication timeline
+- Search and filter by keywords, country, or category
+
+### Prerequisites
 
 - Java 11 or higher
 - Maven 3.6 or higher
-- Internet connection for fetching news data
 
-## Setup Instructions
+### Setup & Run
 
-### 🚀 Quick Setup (Cross-Platform)
-
-**Windows:**
-```batch
-setup.bat
-```
-
-**macOS/Linux:**
 ```bash
+# Quick setup (macOS/Linux)
 ./setup.sh
-```
+# Windows
+setup.bat
 
-**Universal (Python):**
-```bash
-python3 launch.py
-```
+# Run
+./run.sh                # macOS/Linux
+run.bat                 # Windows
+python3 launch.py       # Universal
 
-The setup wizard will:
-- Check system requirements (Java & Maven)
-- Provide OS-specific installation instructions
-- Test the installation
-- Create appropriate launch shortcuts
-
-2. **Get a NewsAPI Key** (Optional but recommended):
-   - Visit [https://newsapi.org](https://newsapi.org) and register for a free account
-   - Get your API key
-   - Edit `src/main/java/com/newsvisualizer/service/NewsApiService.java`
-   - Replace `YOUR_API_KEY_HERE` with your actual API key
-
-### 🖥️ Running the Application
-
-**Method 1: Platform-Specific Launchers**
-
-Windows:
-```batch
-run.bat                 # Full launcher with compilation
-quick-launch.bat       # Quick launcher for compiled project
-```
-
-macOS/Linux:
-```bash
-./run.sh               # Full launcher with compilation
-chmod +x run.sh        # Make executable first time
-```
-
-**Method 2: Universal Python Launcher**
-```bash
-python3 launch.py      # Works on all platforms
-```
-
-**Method 3: Make Commands** (if Make is installed)
-```bash
-make run               # Compile and run
-make setup             # Run setup wizard
-make vscode            # Open in VS Code
-make help              # Show all commands
-```
-
-**Method 4: Command Line**
-```bash
-# Compile and run
+# Or via Maven
 mvn clean compile
 mvn exec:java -Dexec.mainClass="com.newsvisualizer.NewsVisualizerApp"
-
-# Or build JAR and run
-mvn clean package
-java -jar target/news-visualizer-1.0.0.jar
 ```
 
-**Method 4: IDE**
-- Open the project folder in IntelliJ IDEA, Eclipse, or VS Code
-- Import as Maven project
-- Run main class: `com.newsvisualizer.NewsVisualizerApp`
+**API key (optional):** register at [newsapi.org](https://newsapi.org), then set your key in `src/main/java/com/newsvisualizer/service/NewsApiService.java`.
 
-## Usage
+### Key dependencies
 
-1. **Launch the application** - The main window will open with search controls at the top
+Apache HttpClient · Jackson · JFreeChart · Apache Commons Lang · SLF4J + Logback · JUnit
 
-2. **Fetch News**:
-   - Enter keywords in the search field (optional)
-   - Select a country code (optional)
-   - Select a news category (optional)
-   - Click "Fetch News"
+### Troubleshooting
 
-3. **Analyze Data**:
-   - After news is fetched, click "Analyze Data"
-   - The application will perform sentiment analysis and generate visualizations
+- **No articles found** — check internet connection, API key, and quota limits
+- **Build issues** — ensure Java 11+ and Maven are installed; try `mvn clean`
+- **Port 8080 conflict** — the desktop app's server and the web backend both like this port; the web backend defaults to 8081 (override with `PORT=...`)
 
-4. **View Results**:
-   - **Articles Tab**: View all fetched articles in a table
-   - **Sentiment Analysis**: See sentiment distribution and summary statistics
-   - **Source Distribution**: View which sources provided the most articles
-   - **Keywords**: See the most frequently mentioned keywords
-   - **Timeline**: View article publication patterns over time
-
-## Project Structure
-
-```
-NewsVisualizer/
-├── src/main/java/com/newsvisualizer/
-│   ├── NewsVisualizerApp.java          # Main application entry point
-│   ├── model/                          # Data models
-│   │   ├── NewsArticle.java
-│   │   ├── Source.java
-│   │   └── NewsResponse.java
-│   ├── service/                        # External service integration
-│   │   └── NewsApiService.java
-│   ├── utils/                          # Utility classes
-│   │   └── NewsAnalyzer.java
-│   ├── visualization/                  # Chart generation
-│   │   └── ChartGenerator.java
-│   └── gui/                           # User interface
-│       └── MainWindow.java
-├── pom.xml                            # Maven configuration
-└── README.md                          # This file
-```
-
-## Dependencies
-
-- **Apache HttpClient**: For HTTP requests to news APIs
-- **Jackson**: For JSON parsing
-- **JFreeChart**: For data visualization and charting
-- **Apache Commons Lang**: Utility functions
-- **SLF4J + Logback**: Logging
-- **JUnit**: Unit testing
-
-## Configuration
-
-### API Configuration
-Edit `NewsApiService.java` to configure:
-- API endpoints
-- API keys
-- Request parameters
-- Timeout settings
-
-### Analysis Configuration
-Edit `NewsAnalyzer.java` to modify:
-- Sentiment analysis word lists
-- Keyword extraction parameters
-- Stop words for filtering
-
-## Troubleshooting
-
-### No Articles Found
-- Check your internet connection
-- Verify API key is valid and configured
-- Try different search terms or categories
-- Check API quota limits
-
-### Charts Not Displaying
-- Ensure JFreeChart dependency is properly loaded
-- Check console for any error messages
-- Verify data is being fetched successfully
-
-### Build Issues
-- Ensure Java 11+ is installed
-- Verify Maven is properly configured
-- Run `mvn clean` to clear any cached artifacts
-
-## Future Enhancements
-
-- Support for additional news APIs
-- Advanced sentiment analysis using machine learning
-- Export functionality for charts and data
-- Real-time news updates
-- More visualization types (word clouds, network graphs)
-- Database storage for historical analysis
-- Web interface option
+---
 
 ## License
 
@@ -197,4 +119,4 @@ This project is created for educational purposes.
 
 ## Contributing
 
-Feel free to submit issues and enhancement requests!# NewsVisualizer
+Feel free to submit issues and enhancement requests!
